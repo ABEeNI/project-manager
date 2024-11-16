@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import home.projectmanager.dto.TeamDto;
 import home.projectmanager.exception.TeamAlreadyExistsException;
 import home.projectmanager.exception.TeamNameNotProvidedException;
+import home.projectmanager.exception.TeamNotFoundException;
 import home.projectmanager.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -49,7 +50,7 @@ class TeamControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(expectedTeam)))
                 .andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.teamName").value(teamName));
+                .andExpect(jsonPath("$.teamName").value(teamName));
     }
 
     @Test
@@ -99,6 +100,104 @@ class TeamControllerTest {
 
         mockMvc.perform(get("/api/team/" + teamId))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.teamName").value(teamName));
+                .andExpect(jsonPath("$.teamName").value(teamName));
+    }
+
+    @Test
+    void testGetTeamWhenIdIsNotFound() throws Exception {
+
+        Long teamId = 1L;
+
+        when(teamService.getTeam(teamId)).thenThrow(new TeamNotFoundException("Team with id " + teamId + " not found"));
+
+        mockMvc.perform(get("/api/team/" + teamId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Team with id " + teamId + " not found"));
+    }
+
+    @Test
+    void testGetTeams() throws Exception {
+
+        when(teamService.getTeams()).thenReturn(List.of(
+                TeamDto.builder()
+                        .id(1L)
+                        .teamName("Backend")
+                        .build(),
+                TeamDto.builder()
+                        .id(2L)
+                        .teamName("Frontend")
+                        .build()
+        ));
+        mockMvc.perform(get("/api/team"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].teamName").value("Backend"))
+                .andExpect(jsonPath("$[1].teamName").value("Frontend"));
+    }
+
+    @Test
+    void testGetTeamsWhenNoTeams() throws Exception {
+
+        when(teamService.getTeams()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/team"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void testDeleteTeam() throws Exception {
+
+        Long teamId = 1L;
+
+        mockMvc.perform(delete("/api/team/" + teamId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testDeleteTeamWhenIdIsNotFound() throws Exception {
+
+        Long teamId = 1L;
+
+        doThrow(new TeamNotFoundException("Team with id " + teamId + " not found")).when(teamService).deleteTeam(teamId);
+
+        mockMvc.perform(delete("/api/team/" + teamId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Team with id " + teamId + " not found"));
+    }
+
+    @Test
+    void testUpdateTeam () throws Exception {
+
+        Long teamId = 1L;
+        String teamName = "Backend";
+        TeamDto teamDto = TeamDto.builder()
+                .teamName(teamName)
+                .build();
+
+        when(teamService.updateTeam(teamId, teamDto)).thenReturn(teamDto);
+
+        mockMvc.perform(put("/api/team/" + teamId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(teamDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.teamName").value(teamName));
+    }
+
+    @Test
+    void testUpdateTeamWhenIdIsNotFound() throws Exception {
+
+        Long teamId = 1L;
+        String teamName = "Backend";
+        TeamDto teamDto = TeamDto.builder()
+                .teamName(teamName)
+                .build();
+
+        when(teamService.updateTeam(teamId, teamDto)).thenThrow(new TeamNotFoundException("Team with id " + teamId + " not found"));
+
+        mockMvc.perform(put("/api/team/" + teamId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(teamDto)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Team with id " + teamId + " not found"));
     }
 }
