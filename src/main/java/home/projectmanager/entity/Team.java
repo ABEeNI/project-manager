@@ -1,9 +1,9 @@
 package home.projectmanager.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -14,8 +14,12 @@ import lombok.*;
 @Entity
 public class Team {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true)
     private String teamName;
+
+    @ManyToMany(mappedBy = "teams")
+    private Set<Project> projects;
 }
