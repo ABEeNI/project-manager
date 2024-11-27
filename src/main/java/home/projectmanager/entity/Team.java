@@ -2,12 +2,9 @@ package home.projectmanager.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.Array2DHashSet;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -18,7 +15,8 @@ import java.util.Set;
 @Entity
 public class Team {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(unique = true)
@@ -31,6 +29,10 @@ public class Team {
     @EqualsAndHashCode.Exclude
     @ManyToMany(mappedBy = "teams")
     private List<Project> projects = new ArrayList<>();
+
+    public Team(String teamName) {
+        this.teamName = teamName;
+    }
 
     public void addUser(User user) {
         users.add(user);

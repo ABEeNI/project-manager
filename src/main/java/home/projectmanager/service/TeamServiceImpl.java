@@ -30,6 +30,7 @@ public class TeamServiceImpl implements TeamService {
 
     public final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final AuthenticationFacade authenticationFacade;
 
 
     @Override
@@ -41,14 +42,10 @@ public class TeamServiceImpl implements TeamService {
             throw new TeamAlreadyExistsException("Team with name " + teamDto.teamName() + " already exists");
         }
 
-        //TODO AddCurrentUserIdToTeam
-        Team newTeam = Team.builder()
-                .teamName(teamDto.teamName())
-                .users(new ArrayList<>())
-                .build();
+        User currentUser = authenticationFacade.getCurrentUser();
 
-//      User currentUser = authenticationFacade.getCurrentUser();
-//      Team.addUser(currentUser);
+        Team newTeam = new Team(teamDto.teamName());
+        newTeam.addUser(currentUser);
 
         Team savedTeam = teamRepository.save(newTeam);
         log.info("Team with id {} created", savedTeam.getId());
@@ -109,6 +106,7 @@ public class TeamServiceImpl implements TeamService {
     public TeamDto updateTeam(Long id, TeamDto teamDto) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + id + " not found"));
+
         team.setTeamName(teamDto.teamName());
         Team updatedTeam = teamRepository.save(team);
         log.info("Team with id {} updated", id);
@@ -122,6 +120,10 @@ public class TeamServiceImpl implements TeamService {
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + teamId + " not found"));
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userEmail + " not found"));
+
+        if(team.getUsers().contains(user)) {
+            throw new TeamAlreadyExistsException("User with useremail " + userEmail + " already exists in team with id " + teamId);
+        }
 
         team.addUser(user);
 

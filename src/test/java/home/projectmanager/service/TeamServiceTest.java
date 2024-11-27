@@ -279,6 +279,43 @@ class TeamServiceTest {
     }
 
     @Test
+    void testAddUserToTeamWhenUserAlreadyExistsInTeam() {
+        long teamId = 1L;
+        String userEmail = "john.doe@eamil.com";
+
+        User userToBeAdded = User.builder()
+                .id(1L)
+                .firstName("John")
+                .lastName("Doe")
+                .email(userEmail)
+                .teams(new ArrayList<>())
+                .build();
+        User user = User.builder()
+                .id(2L)
+                .firstName("Jane")
+                .lastName("Doe")
+                .email("jane.doe@email.com")
+                .teams(new ArrayList<>())
+                .build();
+
+        Team team = Team.builder()
+                .id(teamId)
+                .teamName("Backend")
+                .users(new ArrayList<>(List.of(user, userToBeAdded)))
+                .build();
+
+        user.getTeams().add(team);
+        userToBeAdded.getTeams().add(team);
+
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(userToBeAdded));
+
+        assertThrows(TeamAlreadyExistsException.class, () -> teamService.addUserToTeam(teamId, userEmail));
+    }
+    //TODO Test for removeUserFromTeam no user with email, no team with id, user not in team
+
+    @Test
     void getTeamsByUserId_ShouldReturnTeams_WhenUserExists() {
         Long userId = 1L;
 

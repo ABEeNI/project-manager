@@ -28,10 +28,12 @@ public class AuthService {
                 .role(registrationRequest.getRole())
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
         var token = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(token)
+                .userId(savedUser.getId())
+                .email(savedUser.getEmail())
                 .build();
     }
 
@@ -46,6 +48,8 @@ public class AuthService {
         var token = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(token)
+                .userId(user.getId())
+                .email(user.getEmail())
                 .build();
     }
 }
