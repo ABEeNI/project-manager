@@ -1,8 +1,6 @@
 package home.projectmanager.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Builder
@@ -14,13 +12,16 @@ import lombok.*;
 @Entity
 public class WorkItemComment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String comment;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "work_item_id")
     private WorkItem workItem;
 }

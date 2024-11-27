@@ -1,8 +1,6 @@
 package home.projectmanager.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Builder
@@ -15,13 +13,16 @@ import lombok.*;
 public class BugItemComment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String comment;
 
     @ManyToOne
-    private BugItem bugItem;
+    private User user;
 
     @ManyToOne
-    private User user;
+    private BugItem bugItem;
+
+
 }

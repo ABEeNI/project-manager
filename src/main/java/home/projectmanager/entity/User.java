@@ -1,16 +1,13 @@
 package home.projectmanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Data
 @Builder
@@ -30,6 +27,19 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToMany
+    @JoinTable(
+            name = "user_team",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_id")
+    )
+    private List<Team> teams = new ArrayList<>();
+
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "assignedUser")
+    private List<WorkItem> assignedWorkItems = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

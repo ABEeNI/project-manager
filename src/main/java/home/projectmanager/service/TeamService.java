@@ -16,4 +16,10 @@ public interface TeamService {
     void deleteTeam(Long id);
 
     TeamDto updateTeam(Long id, TeamDto teamDto);
+
+    void addUserToTeam(Long teamId, String userEmail);
+
+    void removeUserFromTeam(Long teamId, String userEmail);
+
+    List<TeamDto> getTeamsByUserId(Long userId);
 }

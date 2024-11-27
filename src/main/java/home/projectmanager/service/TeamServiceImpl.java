@@ -1,16 +1,27 @@
 package home.projectmanager.service;
 
+import home.projectmanager.dto.ProjectDto;
 import home.projectmanager.dto.TeamDto;
+import home.projectmanager.dto.UserDto;
+import home.projectmanager.entity.Project;
 import home.projectmanager.entity.Team;
-import home.projectmanager.exception.TeamAlreadyExistsException;
-import home.projectmanager.exception.TeamNameNotProvidedException;
-import home.projectmanager.exception.TeamNotFoundException;
+import home.projectmanager.entity.User;
+import home.projectmanager.exception.team.TeamAlreadyExistsException;
+import home.projectmanager.exception.team.TeamNameNotProvidedException;
+import home.projectmanager.exception.team.TeamNotFoundException;
+import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.TeamRepository;
+import home.projectmanager.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +29,8 @@ import java.util.List;
 public class TeamServiceImpl implements TeamService {
 
     public final TeamRepository teamRepository;
+    private final UserRepository userRepository;
+
 
     @Override
     public TeamDto createTeam(TeamDto teamDto) {
@@ -25,13 +38,19 @@ public class TeamServiceImpl implements TeamService {
             throw new TeamNameNotProvidedException("Team name is not provided");
         }
         if(teamRepository.findByTeamName(teamDto.teamName()).isPresent()) {
-            throw  new TeamAlreadyExistsException("Team with name " + teamDto.teamName() + " already exists");
+            throw new TeamAlreadyExistsException("Team with name " + teamDto.teamName() + " already exists");
         }
-        Team newTicket = Team.builder()
+
+        //TODO AddCurrentUserIdToTeam
+        Team newTeam = Team.builder()
                 .teamName(teamDto.teamName())
+                .users(new ArrayList<>())
                 .build();
 
-        Team savedTeam = teamRepository.save(newTicket);
+//      User currentUser = authenticationFacade.getCurrentUser();
+//      Team.addUser(currentUser);
+
+        Team savedTeam = teamRepository.save(newTeam);
         log.info("Team with id {} created", savedTeam.getId());
 
         return convertToDto(savedTeam);
@@ -41,10 +60,31 @@ public class TeamServiceImpl implements TeamService {
     public TeamDto getTeam(Long id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + id + " not found"));
+        List<User> users = team.getUsers();
+        List<UserDto> userDtos = users.stream()
+                .map(user -> UserDto.builder()
+                        .id(user.getId())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .email("")//email is not included, so email addresses are not exposed, but "" for frontend consistency
+                        .build())
+                .collect(Collectors.toList());
+
+        List<Project> projects = team.getProjects();
+        List<ProjectDto> projectDtos = projects.stream()
+                .map(project -> ProjectDto.builder()
+                        .id(project.getId())
+                        .projectName(project.getProjectName())
+                        .projectDescription(project.getProjectDescription())
+                        .build())
+                .collect(Collectors.toList());
+
         log.info("Team with id {} found", id);
         return TeamDto.builder()
                 .id(team.getId())
                 .teamName(team.getTeamName())
+                .projects(projectDtos)
+                .users(userDtos)
                 .build();
     }
 
@@ -73,6 +113,41 @@ public class TeamServiceImpl implements TeamService {
         Team updatedTeam = teamRepository.save(team);
         log.info("Team with id {} updated", id);
         return convertToDto(updatedTeam);
+    }
+
+    @Override
+    @Transactional
+    public void addUserToTeam(Long teamId, String userEmail) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException("Team with id " + teamId + " not found"));
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userEmail + " not found"));
+
+        team.addUser(user);
+
+        teamRepository.save(team);
+        userRepository.save(user);//Cascade??
+        log.info("User with useremail {} added to team with id {}", userEmail, teamId);
+    }
+
+    @Override
+    public void removeUserFromTeam(Long teamId, String userEmail) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException("Team with id " + teamId + " not found"));
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userEmail + " not found"));
+
+        team.removeUser(user);
+
+        teamRepository.save(team);
+        userRepository.save(user);//Cascade??
+        log.info("User with useremail {} removed from team with id {}", userEmail, teamId);
+    }
+
+    @Override
+    public List<TeamDto> getTeamsByUserId(Long userId) {
+        List<Team> teams = teamRepository.findByUsersId(userId);
+        return teams.stream().map(this::convertToDto).toList();
     }
 
     private TeamDto convertToDto(Team team) {

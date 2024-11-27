@@ -1,4 +1,4 @@
-package home.projectmanager.exception;
+package home.projectmanager.exception.team;
 
 public class TeamNotFoundException extends RuntimeException {
     public TeamNotFoundException(String message) {

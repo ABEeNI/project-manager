@@ -1,5 +1,5 @@
 package home.projectmanager.entity;
 
 public enum WorkItemStatus {
-    NEW, IN_PROGRESS, READY, RESOLVED
+    NEW, IN_PROGRESS, READY, RESOLVED, CLOSED
 }

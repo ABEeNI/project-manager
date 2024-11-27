@@ -2,10 +2,12 @@ package home.projectmanager.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import home.projectmanager.dto.ProjectDto;
 import home.projectmanager.dto.TeamDto;
-import home.projectmanager.exception.TeamAlreadyExistsException;
-import home.projectmanager.exception.TeamNameNotProvidedException;
-import home.projectmanager.exception.TeamNotFoundException;
+import home.projectmanager.dto.UserDto;
+import home.projectmanager.exception.team.TeamAlreadyExistsException;
+import home.projectmanager.exception.team.TeamNameNotProvidedException;
+import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,15 +94,29 @@ class TeamControllerTest {
 
         Long teamId = 1L;
         String teamName = "Backend";
-        TeamDto expectedTeam = TeamDto.builder()
+        TeamDto expectedTeamDto = TeamDto.builder()
+                .id(teamId)
                 .teamName(teamName)
+                .projects(List.of(ProjectDto.builder()
+                        .id(1L)
+                        .projectName("Project")
+                        .projectDescription("Description")
+                        .build()))
+                .users(List.of(UserDto.builder()
+                        .id(1L)
+                        .firstName("John")
+                        .lastName("Doe")
+                        .email("")
+                        .build()))
                 .build();
 
-        when(teamService.getTeam(teamId)).thenReturn(expectedTeam);
+        when(teamService.getTeam(teamId)).thenReturn(expectedTeamDto);
 
         mockMvc.perform(get("/api/team/" + teamId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.teamName").value(teamName));
+                .andExpect(jsonPath("$.teamName").value(teamName))
+                .andExpect(jsonPath("$.projects[0].projectName").value("Project"))
+                .andExpect(jsonPath("$.users[0].firstName").value("John"));
     }
 
     @Test
@@ -200,4 +216,39 @@ class TeamControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Team with id " + teamId + " not found"));
     }
+
+    @Test
+    void testAddUserToTeam() throws Exception {
+        String userEmail = "john.doe@eamil.com";
+        Long teamId = 1L;
+
+        mockMvc.perform(put("/api/team/" + teamId + "/user/" + userEmail))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testAddUserToTeamWhenTeamIdIsNotFound() throws Exception {
+        String userEmail = "john.doe@eamil.com";
+        Long teamId = 1L;
+
+        doThrow(new TeamNotFoundException("Team with id " + teamId + " not found")).when(teamService).addUserToTeam(teamId, userEmail);
+
+        mockMvc.perform(put("/api/team/" + teamId + "/user/" + userEmail))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Team with id " + teamId + " not found"));
+    }
+
+    @Test
+    void testAddUserToTeamWhenUserEmailIsNotFound() throws Exception {
+        String userEmail = "john.doe@eamil.com";
+        Long teamId = 1L;
+
+        doThrow(new TeamNotFoundException("User with id " + userEmail + " not found")).when(teamService).addUserToTeam(teamId, userEmail);
+
+        mockMvc.perform(put("/api/team/" + teamId + "/user/" + userEmail))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("User with id " + userEmail + " not found"));
+    }
+
+
 }

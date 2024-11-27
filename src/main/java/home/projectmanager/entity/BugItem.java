@@ -1,12 +1,11 @@
 package home.projectmanager.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -19,6 +18,7 @@ import java.util.Set;
 public class BugItem {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -31,6 +31,9 @@ public class BugItem {
     @ManyToOne
     private WorkItem workItem;
 
-    @OneToMany
-    private Set<BugItemComment> comments;
+    @ManyToOne
+    private Project project;
+
+    @OneToMany(mappedBy = "bugItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BugItemComment> comments = new ArrayList<>();
 }

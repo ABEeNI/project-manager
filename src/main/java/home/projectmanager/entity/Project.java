@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 @Builder
@@ -32,10 +30,29 @@ public class Project {
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "team_id")
     )
-    private Set<Team> teams = new HashSet<>();
+    private List<Team> teams = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards = new ArrayList<>();
 
 
+    public void addTeam(Team team) {
+        teams.add(team);
+        team.getProjects().add(this);
+    }
+
+    public void removeTeam(Team team) {
+        teams.remove(team);
+        team.getProjects().remove(this);
+    }
+
+    public void addBoard(Board board) {
+        boards.add(board);
+        board.setProject(this);
+    }
+
+    public void removeBoard(Board board) {
+        boards.remove(board);
+        board.setProject(null);
+    }
 }
