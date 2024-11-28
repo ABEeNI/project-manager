@@ -1,6 +1,7 @@
 package home.projectmanager.service;
 
 import home.projectmanager.dto.BoardDto;
+import home.projectmanager.dto.WorkItemDto;
 import home.projectmanager.entity.Board;
 import home.projectmanager.entity.Project;
 import home.projectmanager.entity.WorkItem;
@@ -28,39 +29,56 @@ public class BoardServiceImpl implements BoardService {
     private final AccessDecisionVoter accessDecisionVoter;
 
     @Override
-    @Transactional
+    @Transactional//needed
     public BoardDto createBoard(BoardDto boardDto) {
         Project project = projectRepository.findById(boardDto.projectId()) //?? Should it be from pathvariable and in the ProjectService?
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
-        accessDecisionVoter.hasPermission(project);
+        if(!accessDecisionVoter.hasPermission(project)) {
+            throw new AccessDeniedException("User does not have permission to project with id " + boardDto.projectId());
+        }
 
-        Board board = Board.builder()
+        Board newBoard = Board.builder()
                 .boardName(boardDto.boardName())
                 .projectId(boardDto.projectId())
                 .build();
 
-        project.addBoard(board);
+        project.addBoard(newBoard);
 
-        Board savedBoard = boardRepository.save(board);
-        //projectRepository.save(project);//cascade? Do I need to save project?
+        Board savedBoard = boardRepository.save(newBoard);
+        //projectRepository.save(project);//cascade? Do I need to save project? Probably not
         log.info("Board created: {}", savedBoard);
         return convertToDto(savedBoard);
     }
 
     @Override
-    public BoardDto getBoard(Long id) {
+    @Transactional
+    public BoardDto getBoard(Long id) {//needed//it returns all the workItemDtos as well. maybe rename?
         Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new BoardNotFoundException("Board not found"));
+                .orElseThrow(() -> new BoardNotFoundException("Board with id " + id + " not found"));
         if(!accessDecisionVoter.hasPermission(board)) {
             throw new AccessDeniedException("User does not have permission to board with id " + id);
         }
         List<WorkItem> workItems = board.getWorkItems();
+        List<WorkItemDto> workItemDtos = workItems.stream()
+                .map(workItem -> WorkItemDto.builder()
+                        .id(workItem.getId())
+                        .title(workItem.getTitle())
+                        .description(workItem.getDescription())
+                        .points(workItem.getPoints())
+                        .status(workItem.getStatus())
+                        .build())
+                .collect(Collectors.toList());//TODO .toList() everywhere
 
-        return convertToDto(board);
+        return BoardDto.builder()
+                .id(board.getId())
+                .boardName(board.getBoardName())
+                .projectId(board.getProjectId())
+                .workItemDtos(workItemDtos)
+                .build();
     }
 
     @Override
-    public List<BoardDto> getBoards() {
+    public List<BoardDto> getBoards() {//extra/ maybe leave for ADMIN, getBoardByProjectId could be enough
         List<Board> boards = boardRepository.findAll();
         return boards.stream()
                 .map(this::convertToDto)
@@ -69,7 +87,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
-    public void deleteBoard(Long id) {
+    public void deleteBoard(Long id) {//ADMIN or USER? if User then AccessDecisionVoter needed to be added
         if (!boardRepository.existsById(id)) {
             throw new BoardNotFoundException("Board not found");
         }
@@ -78,13 +96,12 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
-    public BoardDto updateBoard(Long id, BoardDto boardDto) {
+    public BoardDto updateBoard(Long id, BoardDto boardDto) {//needed
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new BoardNotFoundException("Board with id " + id + " not found"));
-
         if(!accessDecisionVoter.hasPermission(board)) {
             throw new AccessDeniedException("User does not have permission to board with id " + id);
-        }
+        }//could extract to fetchBoardById
 
         if (boardDto.boardName() != null && !boardDto.boardName().isBlank()) {
             board.setBoardName(boardDto.boardName());
@@ -93,9 +110,10 @@ public class BoardServiceImpl implements BoardService {
         Board updatedBoard = boardRepository.save(board);
         return convertToDto(updatedBoard);
     }
+    //board could be extended with Sprints in future plans
 
     @Override
-    public List<BoardDto> getBoardsByProject(Long projectId) {
+    public List<BoardDto> getBoardsByProject(Long projectId) {//needed
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
         if(!accessDecisionVoter.hasPermission(project)) {
@@ -108,10 +126,10 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private BoardDto convertToDto(Board board) {
-        return new BoardDto(
-                board.getId(),
-                board.getBoardName(),
-                board.getProjectId()
-        );
+        return BoardDto.builder()
+                .id(board.getId())
+                .boardName(board.getBoardName())
+                .projectId(board.getProjectId())
+                .build();
     }
 }
