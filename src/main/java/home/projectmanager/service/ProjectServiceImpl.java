@@ -7,19 +7,18 @@ import home.projectmanager.entity.User;
 import home.projectmanager.exception.project.ProjectAlreadyExistsException;
 import home.projectmanager.exception.project.ProjectNameNotProvidedException;
 import home.projectmanager.exception.project.ProjectNotFoundException;
+import home.projectmanager.exception.team.TeamAlreadyExistsException;
 import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.repository.ProjectRepository;
 import home.projectmanager.repository.TeamRepository;
-import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,8 +28,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final TeamRepository teamRepository;
-    private final UserRepository userRepository;
     private final AuthenticationFacade authenticationFacade;
+    private final AccessDecisionVoter accessDecisionVoter;
 
     @Override
     public ProjectDto createProject(ProjectDto projectDto, Long teamId) {
@@ -45,6 +44,10 @@ public class ProjectServiceImpl implements ProjectService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + teamId + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to create project with team id " + teamId);
+        }
+
         Project project = Project.builder()
                 .projectName(projectDto.projectName())
                 .projectDescription(projectDto.projectDescription())
@@ -54,8 +57,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.addTeam(team);
 
         Project savedProject = projectRepository.save(project);
-        log.info("Project with id {} created", savedProject.getId());
-
+        log.info("Project with id {} created and team with id {} is added to project", savedProject.getId(), teamId);
         return convertToDto(savedProject);
     }
 
@@ -63,12 +65,15 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto getProject(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException("Project with id " + id + " not found"));
+        if(!accessDecisionVoter.hasPermission(project)) {
+            throw new AccessDeniedException("User does not have permission to project with id " + id);
+        }
         log.info("Project with id {} found", id);
         return convertToDto(project);
     }
 
     @Override
-    public List<ProjectDto> getProjects() {
+    public List<ProjectDto> getProjects() { //ADMIN ROLE needed
         List<Project> projects = projectRepository.findAll();
         return projects.stream()
                 .map(this::convertToDto)
@@ -76,7 +81,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void deleteProject(Long id) {
+    public void deleteProject(Long id) { //ADMIN ROLE needed
         if (!projectRepository.existsById(id)) {
             throw new ProjectNotFoundException("Project with id " + id + " not found");
         }
@@ -85,10 +90,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDto updateProject(Long id, ProjectDto projectDto) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException("Project with id " + id + " not found"));
+    public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project with id " + projectId + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(project)) {
+            throw new AccessDeniedException("User does not have permission to project with id " + projectId);
+        }
 
         if (projectDto.projectName() != null && !projectDto.projectName().isBlank()) {
             project.setProjectName(projectDto.projectName());
@@ -98,7 +106,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         Project updatedProject = projectRepository.save(project);
-        log.info("Project with id {} updated", id);
+        log.info("Project with id {} updated", projectId);
         return convertToDto(updatedProject);
     }
 
@@ -107,12 +115,20 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project with id " + projectId + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(project)) {
+            throw new AccessDeniedException("User does not have permission to project with id " + projectId);
+        }
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + teamId + " not found"));
-
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to team with id " + teamId);
+        }
+        if(project.getTeams().contains(team)) {
+            throw new TeamAlreadyExistsException("Team with id " + teamId + " already exists in project with id " + projectId);
+        }
         project.addTeam(team);
 
-        projectRepository.save(project);//TODO cascading to team could be missing, or just separately save team
+        projectRepository.save(project);
         log.info("Team with id {} added to project with id {}", teamId, projectId);
     }
 
@@ -120,12 +136,21 @@ public class ProjectServiceImpl implements ProjectService {
     public void removeTeamFromProject(Long projectId, Long teamId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project with id " + projectId + " not found"));
+
+        if(!accessDecisionVoter.hasPermission(project)) {
+            throw new AccessDeniedException("User does not have permission to project with id " + projectId);
+        }
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + teamId + " not found"));
-        project.removeTeam(team);
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to team with id " + teamId);
+        }
+        if(project.getTeams().contains(team)) {
+            throw new TeamAlreadyExistsException("Team with id " + teamId + " already exists in project with id " + projectId);
+        }
 
         project.removeTeam(team);
-        projectRepository.save(project);//TODO cascading to team could be missing
+        projectRepository.save(project);
         log.info("Team with id {} removed from project with id {}", teamId, projectId);
     }
 

@@ -139,10 +139,13 @@ public class TeamServiceImpl implements TeamService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userEmail + " not found"));
 
+        if(!team.getUsers().contains(user)) {
+            throw new TeamNotFoundException("User with useremail " + userEmail + " not found in team with id " + teamId);
+        }
+
         team.removeUser(user);
 
         teamRepository.save(team);
-        userRepository.save(user);//Cascade??
         log.info("User with useremail {} removed from team with id {}", userEmail, teamId);
     }
 

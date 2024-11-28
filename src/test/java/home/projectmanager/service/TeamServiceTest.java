@@ -38,8 +38,11 @@ class TeamServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private AuthenticationFacade authenticationFacade;
+
     @Test
-    void testCreateTeam() {
+    void testCreateTeam() { //needs refactoring after changes, but with integration test it currently works
         TeamDto teamDto = TeamDto.builder()
                 .teamName("Backend")
                 .build();
@@ -49,6 +52,8 @@ class TeamServiceTest {
                 .build();
 
         when(teamRepository.save(any(Team.class))).thenReturn(team);
+        when(teamRepository.findByTeamName("Backend")).thenReturn(Optional.empty());
+        when(authenticationFacade.getCurrentUser()).thenReturn(User.builder().teams(new ArrayList<>()).build());//probably will need to change this
 
         TeamDto createdTeamDto = teamService.createTeam(teamDto);
 

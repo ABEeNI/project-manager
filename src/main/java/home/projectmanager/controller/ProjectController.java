@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//TODO Add method level security so that only users within Teams associated with the Project can access the endpoints
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/project")

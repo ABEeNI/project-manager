@@ -13,6 +13,7 @@ import home.projectmanager.exception.workitem.WorkItemNotFoundException;
 import home.projectmanager.exception.workitem.WorkItemTitleNotProvidedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -66,5 +67,10 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(WorkItemTitleNotProvidedException.class)
     public ResponseEntity<String> handleWorkItemTitleNotProvided(WorkItemTitleNotProvidedException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDenied(AccessDeniedException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
     }
 }
