@@ -33,7 +33,7 @@ public class Project {
     )
     private List<Team> teams = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards = new ArrayList<>();
 
 
@@ -49,11 +49,11 @@ public class Project {
 
     public void addBoard(Board board) {
         boards.add(board);
-        board.setProject(this);
+        //board.setProject(this);
     }
 
-    public void removeBoard(Board board) {
-        boards.remove(board);
-        board.setProject(null);
-    }
+//    public void removeBoard(Board board) {
+//        boards.remove(board);
+//        board.setProject(null);
+//    }
 }

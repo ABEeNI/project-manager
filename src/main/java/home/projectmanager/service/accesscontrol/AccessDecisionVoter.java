@@ -5,7 +5,6 @@ import home.projectmanager.entity.ProjectObject;
 import home.projectmanager.entity.Team;
 import home.projectmanager.entity.User;
 import home.projectmanager.repository.ProjectRepository;
-import home.projectmanager.service.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

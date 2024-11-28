@@ -4,6 +4,7 @@ import home.projectmanager.dto.UserDto;
 import home.projectmanager.entity.User;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

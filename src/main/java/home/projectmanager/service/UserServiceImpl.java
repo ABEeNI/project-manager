@@ -4,6 +4,7 @@ import home.projectmanager.dto.UserDto;
 import home.projectmanager.entity.User;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;

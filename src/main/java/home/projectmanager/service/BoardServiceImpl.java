@@ -3,13 +3,16 @@ package home.projectmanager.service;
 import home.projectmanager.dto.BoardDto;
 import home.projectmanager.entity.Board;
 import home.projectmanager.entity.Project;
+import home.projectmanager.entity.WorkItem;
 import home.projectmanager.exception.board.BoardNotFoundException;
 import home.projectmanager.exception.project.ProjectNotFoundException;
 import home.projectmanager.repository.BoardRepository;
 import home.projectmanager.repository.ProjectRepository;
+import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,20 +25,24 @@ public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;
     private final ProjectRepository projectRepository;
+    private final AccessDecisionVoter accessDecisionVoter;
 
     @Override
     @Transactional
     public BoardDto createBoard(BoardDto boardDto) {
         Project project = projectRepository.findById(boardDto.projectId()) //?? Should it be from pathvariable and in the ProjectService?
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+        accessDecisionVoter.hasPermission(project);
 
         Board board = Board.builder()
                 .boardName(boardDto.boardName())
+                .projectId(boardDto.projectId())
                 .build();
 
         project.addBoard(board);
-        projectRepository.save(project);//TODO Cascade?
+
         Board savedBoard = boardRepository.save(board);
+        //projectRepository.save(project);//cascade? Do I need to save project?
         log.info("Board created: {}", savedBoard);
         return convertToDto(savedBoard);
     }
@@ -44,6 +51,11 @@ public class BoardServiceImpl implements BoardService {
     public BoardDto getBoard(Long id) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new BoardNotFoundException("Board not found"));
+        if(!accessDecisionVoter.hasPermission(board)) {
+            throw new AccessDeniedException("User does not have permission to board with id " + id);
+        }
+        List<WorkItem> workItems = board.getWorkItems();
+
         return convertToDto(board);
     }
 
@@ -70,6 +82,10 @@ public class BoardServiceImpl implements BoardService {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new BoardNotFoundException("Board with id " + id + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(board)) {
+            throw new AccessDeniedException("User does not have permission to board with id " + id);
+        }
+
         if (boardDto.boardName() != null && !boardDto.boardName().isBlank()) {
             board.setBoardName(boardDto.boardName());
         }
@@ -82,6 +98,9 @@ public class BoardServiceImpl implements BoardService {
     public List<BoardDto> getBoardsByProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+        if(!accessDecisionVoter.hasPermission(project)) {
+            throw new AccessDeniedException("User does not have permission to project with id " + projectId);
+        }
         List<Board> boards = project.getBoards();
         return boards.stream()
                 .map(this::convertToDto)
@@ -92,7 +111,7 @@ public class BoardServiceImpl implements BoardService {
         return new BoardDto(
                 board.getId(),
                 board.getBoardName(),
-                board.getProject().getId()
+                board.getProjectId()
         );
     }
 }

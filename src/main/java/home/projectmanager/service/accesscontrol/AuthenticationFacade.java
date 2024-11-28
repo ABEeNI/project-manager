@@ -1,4 +1,4 @@
-package home.projectmanager.service;
+package home.projectmanager.service.accesscontrol;
 
 import home.projectmanager.entity.User;
 import home.projectmanager.repository.UserRepository;

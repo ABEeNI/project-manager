@@ -12,6 +12,7 @@ import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.TeamRepository;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -12,6 +12,7 @@ import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.repository.ProjectRepository;
 import home.projectmanager.repository.TeamRepository;
 import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
+import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;

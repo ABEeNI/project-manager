@@ -14,23 +14,22 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @Entity
-public class Board {
+public class Board implements ProjectObject {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     private String boardName;
 
-    @EqualsAndHashCode.Exclude
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
+
+    @JoinColumn(name = "project_id", insertable = false, updatable = false)
+    private Long projectId;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "board")
     private List<WorkItem> workItems = new ArrayList<>();
-
 
 
     public void addWorkItem(WorkItem workItem) {
@@ -43,5 +42,8 @@ public class Board {
         workItem.setBoard(null);
     }
 
-
+    @Override
+    public Long getParentProjectId() {
+        return projectId;
+    }
 }

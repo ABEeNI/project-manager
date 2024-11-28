@@ -12,14 +12,12 @@ import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.TeamRepository;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
