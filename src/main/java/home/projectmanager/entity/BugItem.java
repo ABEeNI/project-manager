@@ -25,10 +25,14 @@ public class BugItem {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    private BugItemStatus status;
+
     @ManyToOne
     private User reporter;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_item_id")
     private WorkItem workItem;
 
     @ManyToOne

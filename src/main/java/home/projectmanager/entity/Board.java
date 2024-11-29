@@ -27,20 +27,9 @@ public class Board implements ProjectObject {
     @JoinColumn(name = "project_id", insertable = false, updatable = false)
     private Long projectId;
 
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "board")
+    @EqualsAndHashCode.Exclude //should I remove it or just pass it to the Project somehow?
+    @OneToMany(mappedBy = "boardId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkItem> workItems = new ArrayList<>();
-
-
-    public void addWorkItem(WorkItem workItem) {
-        workItems.add(workItem);
-        workItem.setBoard(this);
-    }
-
-    public void removeWorkItem(WorkItem workItem) {
-        workItems.remove(workItem);
-        workItem.setBoard(null);
-    }
 
     @Override
     public Long getParentProjectId() {

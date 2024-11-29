@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BoardServiceImplTest {
+class BoardServiceTest {
 
     @InjectMocks
     private BoardServiceImpl boardService;
@@ -94,6 +94,34 @@ class BoardServiceImplTest {
         when(accessDecisionVoter.hasPermission(project)).thenReturn(false);
 
         assertThrows(AccessDeniedException.class, () -> boardService.createBoard(boardDto));
+    }
+
+    @Test
+    void createBoard_ShouldThrowException_WhenBoardNameIsBlank() {
+        BoardDto boardDto = BoardDto.builder()
+                .boardName("")
+                .projectId(1L)
+                .build();
+
+        assertThrows(BoardNotFoundException.class, () -> boardService.createBoard(boardDto));
+    }
+
+    @Test
+    void createBoard_ShouldThrowException_WhenBoardNameIsNull() {
+        BoardDto boardDto = BoardDto.builder()
+                .projectId(1L)
+                .build();
+
+        assertThrows(BoardNotFoundException.class, () -> boardService.createBoard(boardDto));
+    }
+
+    @Test
+    void createBoard_ShouldThrowException_WhenProjectIdIsNull() {
+        BoardDto boardDto = BoardDto.builder()
+                .boardName("New Board")
+                .build();
+
+        assertThrows(ProjectNotFoundException.class, () -> boardService.createBoard(boardDto));
     }
 
     @Test

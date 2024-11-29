@@ -4,6 +4,7 @@ import home.projectmanager.entity.Project;
 import home.projectmanager.entity.ProjectObject;
 import home.projectmanager.entity.Team;
 import home.projectmanager.entity.User;
+import home.projectmanager.exception.project.ProjectNotFoundException;
 import home.projectmanager.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +45,25 @@ public class AccessDecisionVoter {
         return false;
     }
 
+    public boolean hasPermission(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project with id " + projectId + " not found"));
+        return hasPermission(project);
+    }
+
     public boolean hasPermission(Team team) {
         User user = authenticationFacade.getCurrentUser();
         return user.getTeams().contains(team);
+    }
+
+    public boolean hasPermission(ProjectObject projectObject, User user) {
+        List<Project> projects = projectRepository.findAllByUserId(user.getId());
+
+        for (Project project : projects) {
+            if (project.getId().equals(projectObject.getParentProjectId())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

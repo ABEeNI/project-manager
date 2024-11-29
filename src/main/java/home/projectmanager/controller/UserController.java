@@ -5,6 +5,8 @@ import home.projectmanager.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -20,5 +22,10 @@ public class UserController {
     @PutMapping("/{userId}")
     public UserDto updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
         return userService.updateUser(userId, userDto);
+    }
+
+    @GetMapping("/project/{projectId}")
+    public List<UserDto> getUsersByProjectId(@PathVariable Long projectId) {
+        return userService.getUsersByProjectId(projectId);
     }
 }

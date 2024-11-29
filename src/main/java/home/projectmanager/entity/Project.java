@@ -33,6 +33,7 @@ public class Project {
     )
     private List<Team> teams = new ArrayList<>();
 
+    //@EqualsAndHashCode.Exclude ?? Where to put it
     @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards = new ArrayList<>();
 

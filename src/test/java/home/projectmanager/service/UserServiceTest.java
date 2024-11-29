@@ -1,9 +1,11 @@
 package home.projectmanager.service;
 
 import home.projectmanager.dto.UserDto;
+import home.projectmanager.entity.Team;
 import home.projectmanager.entity.User;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
 import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +32,9 @@ class UserServiceTest {
 
     @Mock
     private AuthenticationFacade authenticationFacade;
+
+    @Mock
+    private AccessDecisionVoter accessDecisionVoter;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -142,5 +149,53 @@ class UserServiceTest {
         when(authenticationFacade.getCurrentUser()).thenReturn(currentUser);
 
         assertThrows(AccessDeniedException.class, () -> userService.updateUser(otherUserId, clientUserDto));
+    }
+
+    @Test
+    void getUsersByProjectId_ShouldReturnUsers_WhenProjectExistsAndUserHasAccess() {
+        Long projectId = 1L;
+        User user1 = User.builder()
+                .id(1L)
+                .firstName("John")
+                .lastName("Doe")
+                .email("test@email.com")
+                .teams(new ArrayList<>())
+                .build();
+        User user2 = User.builder()
+                .id(2L)
+                .firstName("Jane")
+                .lastName("Doe")
+                .email("jane.doe@email.com")
+                .teams(new ArrayList<>())
+                .build();
+        UserDto expectedUser1 = UserDto.builder()
+                .id(1L)
+                .firstName("John")
+                .lastName("Doe")
+                .email("test@email.com")
+                .build();
+        UserDto expectedUser2 = UserDto.builder()
+                .id(2L)
+                .firstName("Jane")
+                .lastName("Doe")
+                .email("jane.doe@email.com")
+                .build();
+        List<UserDto> expectedUserDtos = new ArrayList<>(List.of(expectedUser1, expectedUser2));
+
+        when(accessDecisionVoter.hasPermission(projectId)).thenReturn(true);
+        when(userRepository.findAllByProjectId(projectId)).thenReturn(List.of(user1,user2));
+
+        List<UserDto> result = userService.getUsersByProjectId(projectId);
+
+        assertEquals(expectedUserDtos, result);
+    }
+
+    @Test
+    void getUsersByProjectId_ShouldThrowException_WhenProjectExistsAndUserHasAccess(){
+        Long projectId = 1L;
+
+        when(accessDecisionVoter.hasPermission(projectId)).thenReturn(false);
+
+        assertThrows(AccessDeniedException.class, () -> userService.getUsersByProjectId(projectId));
     }
 }

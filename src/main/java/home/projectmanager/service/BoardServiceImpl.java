@@ -31,6 +31,12 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional//needed
     public BoardDto createBoard(BoardDto boardDto) {
+        if(boardDto.boardName() == null || boardDto.boardName().isBlank()) {
+            throw new BoardNotFoundException("Board name is not provided");
+        }
+        if(boardDto.projectId() == null) {
+            throw new ProjectNotFoundException("Project id is not provided");
+        }
         Project project = projectRepository.findById(boardDto.projectId()) //?? Should it be from pathvariable and in the ProjectService?
                 .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
         if(!accessDecisionVoter.hasPermission(project)) {
@@ -42,7 +48,7 @@ public class BoardServiceImpl implements BoardService {
                 .projectId(boardDto.projectId())
                 .build();
 
-        project.addBoard(newBoard);
+        project.addBoard(newBoard);//needed? Not even saved later. Only the value of the foreign key is relevant
 
         Board savedBoard = boardRepository.save(newBoard);
         //projectRepository.save(project);//cascade? Do I need to save project? Probably not

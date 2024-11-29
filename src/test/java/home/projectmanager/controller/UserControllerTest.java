@@ -86,5 +86,4 @@ class UserControllerTest {
 
         verify(userService, times(1)).updateUser(userId, clientUserDto);
     }
-    //TODO tests for error cases
 }
