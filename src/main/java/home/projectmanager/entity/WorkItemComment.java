@@ -10,18 +10,25 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @Entity
-public class WorkItemComment {
+public class WorkItemComment implements ProjectObject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String comment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private User commenter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_item_id")
     private WorkItem workItem;
+
+    private Long projectId;
+
+    @Override
+    public Long getParentProjectId() {
+        return getProjectId();
+    }
 }
