@@ -6,6 +6,6 @@ import lombok.Builder;
 public record WorkItemCommentDto(
         Long id,
         String comment,
-        String commenter
+        UserDto commenter
 ) {
 }

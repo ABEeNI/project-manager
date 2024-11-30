@@ -199,16 +199,28 @@ class WorkItemServiceTest {
 
         mainWorkItem.setSubWorkItems(List.of(subWorkItem1, subWorkItem2));
 
+        User commenter1 = User.builder()
+                .id(1L)
+                .email("user1@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
         WorkItemComment comment1 = WorkItemComment.builder()
                 .id(1L)
                 .comment("First Comment")
-                .commenter(User.builder().email("user1@email.com").build())
+                .commenter(commenter1)
                 .build();
 
+        User commenter2 = User.builder()
+                .id(2L)
+                .email("user2@email.com")
+                .firstName("Jana")
+                .lastName("Doe")
+                .build();
         WorkItemComment comment2 = WorkItemComment.builder()
                 .id(2L)
                 .comment("Second Comment")
-                .commenter(User.builder().email("user2@email.com").build())
+                .commenter(commenter2)
                 .build();
 
         mainWorkItem.setComments(List.of(comment1, comment2));
@@ -244,12 +256,22 @@ class WorkItemServiceTest {
                         WorkItemCommentDto.builder()
                                 .id(comment1.getId())
                                 .comment(comment1.getComment())
-                                .commenter(comment1.getCommenter().getEmail())
+                                .commenter(UserDto.builder()
+                                        .id(commenter1.getId())
+                                        .email(commenter1.getEmail())
+                                        .firstName(commenter1.getFirstName())
+                                        .lastName(commenter1.getLastName())
+                                        .build())
                                 .build(),
                         WorkItemCommentDto.builder()
                                 .id(comment2.getId())
                                 .comment(comment2.getComment())
-                                .commenter(comment2.getCommenter().getEmail())
+                                .commenter(UserDto.builder()
+                                        .id(commenter2.getId())
+                                        .email(commenter2.getEmail())
+                                        .firstName(commenter2.getFirstName())
+                                        .lastName(commenter2.getLastName())
+                                        .build())
                                 .build()
                 ))
                 .bugItemDto(BugItemDto.builder()

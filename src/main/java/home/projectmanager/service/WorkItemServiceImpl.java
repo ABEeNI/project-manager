@@ -108,7 +108,12 @@ public class WorkItemServiceImpl implements WorkItemService {
                 .map(comment -> WorkItemCommentDto.builder()
                         .id(comment.getId())
                         .comment(comment.getComment())
-                        .commenter(comment.getCommenter().getEmail())
+                        .commenter(comment.getCommenter() != null ? UserDto.builder()
+                                .id(comment.getCommenter().getId())
+                                .email(comment.getCommenter().getEmail())
+                                .firstName(comment.getCommenter().getFirstName())
+                                .lastName(comment.getCommenter().getLastName())
+                                .build() : null)
                         .build())
                 .collect(Collectors.toList());
         BugItem bugItem = workItem.getBugItem();

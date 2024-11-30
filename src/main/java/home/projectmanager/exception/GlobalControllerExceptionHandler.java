@@ -11,6 +11,8 @@ import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.exception.workitem.WorkItemNotFoundException;
 import home.projectmanager.exception.workitem.WorkItemTitleNotProvidedException;
+import home.projectmanager.exception.workitemcomment.WorkItemCommentNotFoundException;
+import home.projectmanager.exception.workitemcomment.WorkItemCommentNotProvided;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -72,5 +74,15 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDenied(AccessDeniedException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(WorkItemCommentNotFoundException.class)
+    public ResponseEntity<String> handleWorkItemCommentNotFound(WorkItemCommentNotFoundException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(WorkItemCommentNotProvided.class)
+    public ResponseEntity<String> handleWorkItemCommentNotProvided(WorkItemCommentNotProvided exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
