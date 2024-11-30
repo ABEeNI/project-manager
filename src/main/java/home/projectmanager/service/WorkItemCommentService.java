@@ -6,5 +6,6 @@ public interface WorkItemCommentService {
     WorkItemCommentDto createComment(Long workItemId, WorkItemCommentDto workItemCommentDto);
 
     WorkItemCommentDto updateComment(Long commentId, WorkItemCommentDto workItemCommentDto);
+
     void deleteComment(Long commentId);
 }

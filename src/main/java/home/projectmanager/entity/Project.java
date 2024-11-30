@@ -15,6 +15,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Entity
 public class Project {
+
     @Id
     @GeneratedValue
     @Column(name = "id", nullable = false)
@@ -25,6 +26,7 @@ public class Project {
 
     private String projectDescription;
 
+    @EqualsAndHashCode.Exclude
     @ManyToMany
     @JoinTable(
             name = "project_team",
@@ -37,6 +39,8 @@ public class Project {
     @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards = new ArrayList<>();
 
+    @OneToMany(mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BugItem> bugItems = new ArrayList<>();
 
     public void addTeam(Team team) {
         teams.add(team);

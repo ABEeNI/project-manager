@@ -50,7 +50,7 @@ public class ProjectControllerTest {
 
         when(projectService.createProject(any(ProjectDto.class), eq(teamId))).thenReturn(createdProjectDto);
 
-        mockMvc.perform(post("/api/project/team/1")
+        mockMvc.perform(post("/api/projects/teams/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(projectDto)))
                 .andExpect(status().isCreated())

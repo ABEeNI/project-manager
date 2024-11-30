@@ -14,8 +14,10 @@ import java.util.List;
 @EqualsAndHashCode
 @Entity
 public class WorkItem implements ProjectObject {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     private String title;

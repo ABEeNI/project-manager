@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/board")
+@RequestMapping("/api/boards")
 @RequiredArgsConstructor
 public class BoardController {
 
@@ -33,7 +33,8 @@ public class BoardController {
         List<BoardDto> boards = boardService.getBoards();
         return ResponseEntity.ok(boards);
     }
-    @GetMapping("/project/{projectId}")//should be in ProjectController?
+
+    @GetMapping("/projects/{projectId}")//should be in ProjectController?
     public ResponseEntity<List<BoardDto>> getBoardsByProject(@PathVariable Long projectId) {
         List<BoardDto> boards = boardService.getBoardsByProject(projectId);
         return ResponseEntity.ok(boards);

@@ -149,7 +149,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<TeamDto> getTeamsByUserId(Long userId) {
-        List<Team> teams = teamRepository.findByUsersId(userId);
+        List<Team> teams = teamRepository.findAllByUsersId(userId);
         return teams.stream().map(this::convertToDto).toList();
     }
 

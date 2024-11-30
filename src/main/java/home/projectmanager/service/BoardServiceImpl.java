@@ -5,6 +5,7 @@ import home.projectmanager.dto.WorkItemDto;
 import home.projectmanager.entity.Board;
 import home.projectmanager.entity.Project;
 import home.projectmanager.entity.WorkItem;
+import home.projectmanager.exception.board.BoardNameNotProvidedException;
 import home.projectmanager.exception.board.BoardNotFoundException;
 import home.projectmanager.exception.project.ProjectNotFoundException;
 import home.projectmanager.repository.BoardRepository;
@@ -32,13 +33,13 @@ public class BoardServiceImpl implements BoardService {
     @Transactional//needed
     public BoardDto createBoard(BoardDto boardDto) {
         if(boardDto.boardName() == null || boardDto.boardName().isBlank()) {
-            throw new BoardNotFoundException("Board name is not provided");
+            throw new BoardNameNotProvidedException("Board name is not provided");
         }
         if(boardDto.projectId() == null) {
             throw new ProjectNotFoundException("Project id is not provided");
         }
         Project project = projectRepository.findById(boardDto.projectId()) //?? Should it be from pathvariable and in the ProjectService?
-                .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
+                .orElseThrow(() -> new ProjectNotFoundException("Project with id: " + boardDto.projectId() + " not found"));
         if(!accessDecisionVoter.hasPermission(project)) {
             throw new AccessDeniedException("User does not have permission to project with id " + boardDto.projectId());
         }

@@ -12,7 +12,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/team")
+@RequestMapping("/api/teams")
 public class TeamController {
 
     private final TeamService teamService;
@@ -47,18 +47,18 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedTeamDto);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public List<TeamDto> getTeamsByUserId(@PathVariable Long userId) {
         return teamService.getTeamsByUserId(userId);
     }
 
-    @PutMapping("/{teamId}/user/{userEmail}")
+    @PutMapping("/{teamId}/users/{userEmail}")
     public ResponseEntity<Void> addUserToTeam(@PathVariable Long teamId, @PathVariable String userEmail) {
         teamService.addUserToTeam(teamId, userEmail);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @DeleteMapping("/{teamId}/user/{userEmail}")
+    @DeleteMapping("/{teamId}/users/{userEmail}")
     public ResponseEntity<Void> removeUserFromTeam(@PathVariable Long teamId, @PathVariable String userEmail) {
         teamService.removeUserFromTeam(teamId, userEmail);
         return ResponseEntity.status(HttpStatus.OK).build();

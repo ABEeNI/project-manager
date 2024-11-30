@@ -15,10 +15,11 @@ import java.util.Set;
 @Setter
 @EqualsAndHashCode
 @Entity
-public class BugItem {
+public class BugItem implements ProjectObject {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     private String title;
@@ -35,9 +36,14 @@ public class BugItem {
     @JoinColumn(name = "work_item_id")
     private WorkItem workItem;
 
-    @ManyToOne
-    private Project project;
+    @JoinColumn(name = "project_id", updatable = false)
+    private Long projectId;
 
     @OneToMany(mappedBy = "bugItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BugItemComment> comments = new ArrayList<>();
+
+    @Override
+    public Long getParentProjectId() {
+        return projectId;
+    }
 }

@@ -24,7 +24,7 @@ public class Board implements ProjectObject {
     private String boardName;
 
 
-    @JoinColumn(name = "project_id", insertable = false, updatable = false)
+    @JoinColumn(name = "project_id", updatable = false)
     private Long projectId;
 
     @EqualsAndHashCode.Exclude //should I remove it or just pass it to the Project somehow?
