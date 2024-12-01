@@ -40,7 +40,7 @@ jobs:
       run: |
           echo "DB_USERNAME=${{secrets.DB_USERNAME}}" >> .env
           echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
-          echo "DB_URL=${{DB_URL}}" >> .env
+          echo "DB_URL=${{secrets.DB_URL}}" >> .env
           echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
     - name: Build and push
       uses: docker/build-push-action@v6
