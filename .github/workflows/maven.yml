@@ -36,27 +36,12 @@ jobs:
       with:
         username: ${{ vars.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Create .env file
-      run: |
-          echo "DB_USERNAME=${{secrets.DB_USERNAME}}" >> .env
-          echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
-          echo "DB_URL=${{secrets.DB_URL}}" >> .env
-          echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
     - name: Build and push
       uses: docker/build-push-action@v6
       with:
         context: .
         push: true
         tags: ${{ vars.DOCKERHUB_USERNAME }}/app:latest
-    - name: Compose up
-      run: docker-compose up -d
-    - name: Wait for services to be healthy
-      run: |
-        echo "Waiting for services to be up..."
-        sleep 30
-    - name: Teardown Docker Compose
-      if: always()
-      run: docker-compose down
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
