@@ -13,6 +13,7 @@ public record BugItemDto(
         BugItemStatus status,
         List<BugItemCommentDto> comments,
         Long projectId,
-        WorkItemDto workItemDto
+        WorkItemDto workItemDto,
+        UserDto reporter
 ) {
 }

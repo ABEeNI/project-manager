@@ -7,13 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/bugitems")
+@RequestMapping("/api/bugitem")
 @RequiredArgsConstructor
 public class BugItemCommentController {
 
     private final BugItemCommentService bugItemCommentService;
 
-    @PostMapping("/{bugItemId}/comments")
+    @PostMapping("/{bugItemId}/bugitemcomments")
     public ResponseEntity<BugItemCommentDto> createComment(
             @PathVariable Long bugItemId,
             @RequestBody BugItemCommentDto bugItemCommentDto) {
@@ -21,7 +21,7 @@ public class BugItemCommentController {
         return ResponseEntity.ok(createdComment);
     }
 
-    @PutMapping("/{commentId}")
+    @PutMapping("bugitemcomments/{commentId}")
     public ResponseEntity<BugItemCommentDto> updateComment(
             @PathVariable Long commentId,
             @RequestBody BugItemCommentDto bugItemCommentDto) {
@@ -29,7 +29,7 @@ public class BugItemCommentController {
         return ResponseEntity.ok(updatedComment);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("bugitemcomments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId) {
         bugItemCommentService.deleteComment(commentId);

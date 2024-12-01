@@ -9,6 +9,7 @@ import home.projectmanager.exception.bugitem.BugItemTitleNotProvidedError;
 import home.projectmanager.exception.project.ProjectNotFoundException;
 import home.projectmanager.repository.BugItemRepository;
 import home.projectmanager.repository.ProjectRepository;
+import home.projectmanager.repository.WorkItemRepository;
 import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
 import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class BugItemServiceImpl implements BugItemService {
     private final AccessDecisionVoter accessDecisionVoter;
     private final BugItemRepository bugItemRepository;
     private final AuthenticationFacade authenticationFacade  ;
+    private final WorkItemRepository workItemRepository;
 
     @Override
     public BugItemDto createBugItem(BugItemDto bugItemDto) {
@@ -99,7 +101,6 @@ public class BugItemServiceImpl implements BugItemService {
         BugItem savedBugItem = bugItemRepository.save(bugItem);
         log.info("BugItem updated: {}", savedBugItem);
         return convertToDto(savedBugItem);
-
     }
 
     @Override
@@ -108,6 +109,11 @@ public class BugItemServiceImpl implements BugItemService {
                 .orElseThrow(() -> new ProjectNotFoundException("BugItem with id: " + id + " not found"));
         if(!accessDecisionVoter.hasPermission(bugItem)) {
             throw new AccessDeniedException("User does not have permission to project with id " + bugItem.getProjectId());
+        }
+        WorkItem workItem = bugItem.getWorkItem();
+        if(workItem != null) {
+            workItem.removeBugItem();
+            workItemRepository.save(workItem);
         }
         bugItemRepository.deleteById(id);
         log.info("BugItem deleted: {}", bugItem);
@@ -126,6 +132,12 @@ public class BugItemServiceImpl implements BugItemService {
                 .comments(savedBugItem.getComments() == null ? null : savedBugItem.getComments().stream()
                         .map(this::convertToDto)
                         .toList())
+                .reporter(UserDto.builder()
+                        .id(savedBugItem.getReporter().getId())
+                        .email(savedBugItem.getReporter().getEmail())
+                        .firstName(savedBugItem.getReporter().getFirstName())
+                        .lastName(savedBugItem.getReporter().getLastName())
+                        .build())
                 .build();
     }
     private BugItemCommentDto convertToDto(BugItemComment bugItemComment) {

@@ -21,7 +21,7 @@ public class WorkItemCommentController {
         return ResponseEntity.ok(createdComment);
     }
 
-    @PutMapping("/{commentId}")
+    @PutMapping("/workitemcomment/{commentId}")
     public ResponseEntity<WorkItemCommentDto> updateComment(
             @PathVariable Long commentId,
             @RequestBody WorkItemCommentDto workItemCommentDto) {
@@ -29,7 +29,7 @@ public class WorkItemCommentController {
         return ResponseEntity.ok(updatedComment);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/workitemcomment/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId) {
         workItemCommentService.deleteComment(commentId);

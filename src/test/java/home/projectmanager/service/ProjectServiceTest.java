@@ -23,20 +23,5 @@ public class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
-    @Test
-    void testCreateProject() {
-        ProjectDto projectDto = ProjectDto.builder()
-                .projectName("Project")
-                .projectDescription("Description")
-                .build();
 
-        Project project = Project.builder()
-                .id(1L)
-                .projectName("Project")
-                .projectDescription("Description")
-                .build();
-
-        when(projectRepository.findByProjectName(projectDto.projectName())).thenReturn(Optional.empty());
-        when(projectRepository.save(any(Project.class))).thenReturn(project);
-    }
 }
