@@ -12,7 +12,8 @@ import lombok.*;
 @Entity
 public class WorkItemComment implements ProjectObject {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     private String comment;

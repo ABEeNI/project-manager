@@ -351,7 +351,7 @@ class TeamServiceTest {
                         .build()
         );
 
-        when(teamRepository.findByUsersId(userId)).thenReturn(teams);
+        when(teamRepository.findAllByUsersId(userId)).thenReturn(teams);
 
         List<TeamDto> result = teamService.getTeamsByUserId(userId);
 
@@ -362,7 +362,7 @@ class TeamServiceTest {
     void getTeamsByUserId_ShouldReturnEmptyList_WhenUserDoesNotExist() {
         Long userId = 1L;
 
-        when(teamRepository.findByUsersId(userId)).thenReturn(new ArrayList<>());
+        when(teamRepository.findAllByUsersId(userId)).thenReturn(new ArrayList<>());
 
         List<TeamDto> result = teamService.getTeamsByUserId(userId);
 

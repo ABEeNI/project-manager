@@ -11,22 +11,22 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/api/projects")
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/team/{teamId}")
+    @PostMapping("/teams/{teamId}")
     public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto, @PathVariable Long teamId) {
         ProjectDto createdProjectDto = projectService.createProject(projectDto, teamId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProjectDto);
     }
-    @PutMapping("/{projectId}/team/{teamId}")
+    @PutMapping("/{projectId}/teams/{teamId}")
     public ResponseEntity<Void> addTeamToProject(@PathVariable Long projectId, @PathVariable Long teamId) {
         projectService.addTeamToProject(projectId, teamId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-    @DeleteMapping("/{projectId}/team/{teamId}")
+    @DeleteMapping("/{projectId}/teams/{teamId}")
     public ResponseEntity<Void> removeTeamFromProject(@PathVariable Long projectId, @PathVariable Long teamId) {
         projectService.removeTeamFromProject(projectId, teamId);
         return ResponseEntity.status(HttpStatus.OK).build();

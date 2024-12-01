@@ -48,7 +48,7 @@ class TeamControllerTest {
 
         when(teamService.createTeam(any(TeamDto.class))).thenReturn(expectedTeam);
 
-        mockMvc.perform(post("/api/team")
+        mockMvc.perform(post("/api/teams")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(expectedTeam)))
                 .andExpect(status().isCreated())
@@ -65,7 +65,7 @@ class TeamControllerTest {
 
         when(teamService.createTeam(any(TeamDto.class))).thenThrow(new TeamNameNotProvidedException("Team name cannot be empty"));
 
-        mockMvc.perform(post("/api/team")
+        mockMvc.perform(post("/api/teams")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamDto)))
                 .andExpect(status().isBadRequest())
@@ -82,7 +82,7 @@ class TeamControllerTest {
 
         when(teamService.createTeam(any(TeamDto.class))).thenThrow(new TeamAlreadyExistsException("Team with name " + teamName + " already exists"));
 
-        mockMvc.perform(post("/api/team")
+        mockMvc.perform(post("/api/teams")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamDto)))
                 .andExpect(status().isBadRequest())
@@ -112,7 +112,7 @@ class TeamControllerTest {
 
         when(teamService.getTeam(teamId)).thenReturn(expectedTeamDto);
 
-        mockMvc.perform(get("/api/team/" + teamId))
+        mockMvc.perform(get("/api/teams/" + teamId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.teamName").value(teamName))
                 .andExpect(jsonPath("$.projects[0].projectName").value("Project"))
@@ -126,7 +126,7 @@ class TeamControllerTest {
 
         when(teamService.getTeam(teamId)).thenThrow(new TeamNotFoundException("Team with id " + teamId + " not found"));
 
-        mockMvc.perform(get("/api/team/" + teamId))
+        mockMvc.perform(get("/api/teams/" + teamId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Team with id " + teamId + " not found"));
     }
@@ -144,7 +144,7 @@ class TeamControllerTest {
                         .teamName("Frontend")
                         .build()
         ));
-        mockMvc.perform(get("/api/team"))
+        mockMvc.perform(get("/api/teams"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].teamName").value("Backend"))
                 .andExpect(jsonPath("$[1].teamName").value("Frontend"));
@@ -155,7 +155,7 @@ class TeamControllerTest {
 
         when(teamService.getTeams()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/team"))
+        mockMvc.perform(get("/api/teams"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
     }
@@ -165,7 +165,7 @@ class TeamControllerTest {
 
         Long teamId = 1L;
 
-        mockMvc.perform(delete("/api/team/" + teamId))
+        mockMvc.perform(delete("/api/teams/" + teamId))
                 .andExpect(status().isNoContent());
     }
 
@@ -176,7 +176,7 @@ class TeamControllerTest {
 
         doThrow(new TeamNotFoundException("Team with id " + teamId + " not found")).when(teamService).deleteTeam(teamId);
 
-        mockMvc.perform(delete("/api/team/" + teamId))
+        mockMvc.perform(delete("/api/teams/" + teamId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Team with id " + teamId + " not found"));
     }
@@ -192,7 +192,7 @@ class TeamControllerTest {
 
         when(teamService.updateTeam(teamId, teamDto)).thenReturn(teamDto);
 
-        mockMvc.perform(put("/api/team/" + teamId)
+        mockMvc.perform(put("/api/teams/" + teamId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamDto)))
                 .andExpect(status().isOk())
@@ -210,7 +210,7 @@ class TeamControllerTest {
 
         when(teamService.updateTeam(teamId, teamDto)).thenThrow(new TeamNotFoundException("Team with id " + teamId + " not found"));
 
-        mockMvc.perform(put("/api/team/" + teamId)
+        mockMvc.perform(put("/api/teams/" + teamId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamDto)))
                 .andExpect(status().isNotFound())
@@ -222,7 +222,7 @@ class TeamControllerTest {
         String userEmail = "john.doe@eamil.com";
         Long teamId = 1L;
 
-        mockMvc.perform(put("/api/team/" + teamId + "/user/" + userEmail))
+        mockMvc.perform(put("/api/teams/" + teamId + "/users/" + userEmail))
                 .andExpect(status().isOk());
     }
 
@@ -233,7 +233,7 @@ class TeamControllerTest {
 
         doThrow(new TeamNotFoundException("Team with id " + teamId + " not found")).when(teamService).addUserToTeam(teamId, userEmail);
 
-        mockMvc.perform(put("/api/team/" + teamId + "/user/" + userEmail))
+        mockMvc.perform(put("/api/teams/" + teamId + "/users/" + userEmail))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Team with id " + teamId + " not found"));
     }
@@ -245,7 +245,7 @@ class TeamControllerTest {
 
         doThrow(new TeamNotFoundException("User with id " + userEmail + " not found")).when(teamService).addUserToTeam(teamId, userEmail);
 
-        mockMvc.perform(put("/api/team/" + teamId + "/user/" + userEmail))
+        mockMvc.perform(put("/api/teams/" + teamId + "/users/" + userEmail))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("User with id " + userEmail + " not found"));
     }

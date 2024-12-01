@@ -4,6 +4,7 @@ import home.projectmanager.dto.BoardDto;
 import home.projectmanager.entity.Board;
 import home.projectmanager.entity.Project;
 import home.projectmanager.entity.WorkItem;
+import home.projectmanager.exception.board.BoardNameNotProvidedException;
 import home.projectmanager.exception.board.BoardNotFoundException;
 import home.projectmanager.exception.project.ProjectNotFoundException;
 import home.projectmanager.repository.BoardRepository;
@@ -103,7 +104,7 @@ class BoardServiceTest {
                 .projectId(1L)
                 .build();
 
-        assertThrows(BoardNotFoundException.class, () -> boardService.createBoard(boardDto));
+        assertThrows(BoardNameNotProvidedException.class, () -> boardService.createBoard(boardDto));
     }
 
     @Test
@@ -112,7 +113,7 @@ class BoardServiceTest {
                 .projectId(1L)
                 .build();
 
-        assertThrows(BoardNotFoundException.class, () -> boardService.createBoard(boardDto));
+        assertThrows(BoardNameNotProvidedException.class, () -> boardService.createBoard(boardDto));
     }
 
     @Test

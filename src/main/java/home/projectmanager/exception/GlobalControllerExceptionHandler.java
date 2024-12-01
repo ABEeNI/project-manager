@@ -1,7 +1,11 @@
 package home.projectmanager.exception;
 
 
+import home.projectmanager.exception.board.BoardNameNotProvidedException;
 import home.projectmanager.exception.board.BoardNotFoundException;
+import home.projectmanager.exception.bugitem.BugItemTitleNotProvidedError;
+import home.projectmanager.exception.bugitemcomment.BugItemCommentNotFoundException;
+import home.projectmanager.exception.bugitemcomment.BugItemCommentNotProvided;
 import home.projectmanager.exception.project.ProjectAlreadyExistsException;
 import home.projectmanager.exception.project.ProjectNameNotProvidedException;
 import home.projectmanager.exception.project.ProjectNotFoundException;
@@ -61,6 +65,11 @@ public class GlobalControllerExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(BoardNameNotProvidedException.class)
+    public ResponseEntity<String> handleBoardNameNotProvided(BoardNameNotProvidedException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(WorkItemNotFoundException.class)
     public ResponseEntity<String> handleWorkItemNotFound(WorkItemNotFoundException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
@@ -84,5 +93,20 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(WorkItemCommentNotProvided.class)
     public ResponseEntity<String> handleWorkItemCommentNotProvided(WorkItemCommentNotProvided exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BugItemTitleNotProvidedError.class)
+    public ResponseEntity<String> handleBugItemTitleNotProvided(BugItemTitleNotProvidedError exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BugItemCommentNotProvided.class)
+    public ResponseEntity<String> handleBugItemCommentNotProvided(BugItemCommentNotProvided exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BugItemCommentNotFoundException.class)
+    public ResponseEntity<String> handleBugItemCommentNotFound(BugItemCommentNotFoundException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

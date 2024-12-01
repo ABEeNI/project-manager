@@ -31,7 +31,7 @@ public class WorkItemServiceImpl implements WorkItemService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final AccessDecisionVoter accessDecisionVoter;
-    private final BugItemRepository bugitemRepository;
+    private final BugItemRepository bugItemRepository;
 
     @Override
     @Transactional
@@ -133,7 +133,7 @@ public class WorkItemServiceImpl implements WorkItemService {
                 .boardId(workItem.getBoardId())
                 .subWorkItems(workItem.getSubWorkItems().stream()
                         .map(this::convertToDto)
-                        .collect(Collectors.toList()))
+                        .collect(Collectors.toList()))//what if null?
                 .comments(commentDtos)
                 .assignedUser(workItem.getAssignedUser() != null ? UserDto.builder()
                         .id(workItem.getAssignedUser().getId())
@@ -151,6 +151,12 @@ public class WorkItemServiceImpl implements WorkItemService {
         if(!accessDecisionVoter.hasPermission(workItem)) {
             throw new AccessDeniedException("User does not have permission to work item with id " + id);
         }
+        BugItem bugItem = workItem.getBugItem();
+        workItem.removeBugItem();
+        if(bugItem != null) {
+            bugItemRepository.save(bugItem);
+        }
+
         workItemRepository.deleteById(id);
     }
 
@@ -184,13 +190,13 @@ public class WorkItemServiceImpl implements WorkItemService {
                     .orElseThrow(() -> new UserNotFoundException("Assigned user not found"));
             workItem.setAssignedUser(assignedUser);
         }
-        if(workItemDto.bugItemDto() != null) {
-            BugItem bugItem = bugitemRepository.findById(workItemDto.bugItemDto().id())
+        if(workItemDto.bugItemDto() != null && workItemDto.bugItemDto().id() != null) {
+            BugItem bugItem = bugItemRepository.findById(workItemDto.bugItemDto().id())
                     .orElseThrow(() -> new BugItemNotFoundException("Bug item with id " + workItemDto.bugItemDto().id() + " not found"));
             BugItem previosBugItem = workItem.getBugItem();
             if(previosBugItem != null) {
                 previosBugItem.setWorkItem(null);
-                bugitemRepository.save(previosBugItem);
+                bugItemRepository.save(previosBugItem);
             }
             workItem.addBugItem(bugItem);
         }

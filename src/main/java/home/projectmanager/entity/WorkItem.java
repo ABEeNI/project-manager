@@ -14,8 +14,10 @@ import java.util.List;
 @EqualsAndHashCode
 @Entity
 public class WorkItem implements ProjectObject {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     private String title;
@@ -46,7 +48,7 @@ public class WorkItem implements ProjectObject {
     @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkItemComment> comments = new ArrayList<>();
 
-    @OneToOne(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = false)
+    @OneToOne(mappedBy = "workItem", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     private BugItem bugItem;
 
     @Override
@@ -57,5 +59,12 @@ public class WorkItem implements ProjectObject {
     public void addBugItem(BugItem bugItem) {
         this.bugItem = bugItem;
         bugItem.setWorkItem(this);
+    }
+
+    public void removeBugItem() {
+        if (bugItem != null) {
+            bugItem.setWorkItem(null);
+            this.bugItem = null;
+        }
     }
 }

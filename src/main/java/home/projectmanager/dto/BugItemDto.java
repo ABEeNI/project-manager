@@ -1,5 +1,6 @@
 package home.projectmanager.dto;
 
+import home.projectmanager.entity.BugItemStatus;
 import lombok.Builder;
 
 import java.util.List;
@@ -9,8 +10,10 @@ public record BugItemDto(
         Long id,
         String title,
         String description,
-        String status,
-        List<WorkItemCommentDto> comments,
-        Long workItemId
+        BugItemStatus status,
+        List<BugItemCommentDto> comments,
+        Long projectId,
+        WorkItemDto workItemDto,
+        UserDto reporter
 ) {
 }

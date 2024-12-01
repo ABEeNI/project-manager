@@ -10,19 +10,27 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @Entity
-public class BugItemComment {
+public class BugItemComment implements ProjectObject {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
     private Long id;
 
     private String comment;
 
-    @ManyToOne
-    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User commenter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bug_item_id")
     private BugItem bugItem;
 
+    private Long projectId;
 
+    @Override
+    public Long getParentProjectId() {
+        return projectId;
+    }
 }
