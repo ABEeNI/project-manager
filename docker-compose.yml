@@ -1,7 +1,6 @@
 services:
   app:
-    build: .
-    image: project-manager-app:latest
+    image: abeeni/app:latest
     container_name: project-manager-app
     ports:
       - "8080:8080"

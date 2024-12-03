@@ -32,6 +32,7 @@ public class AccessDecisionVoter {
         }
         return false;
     }
+
     public boolean hasPermission(Project projectToAccess) {
         User user = authenticationFacade.getCurrentUser();
 

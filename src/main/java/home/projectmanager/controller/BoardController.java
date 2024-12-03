@@ -29,7 +29,7 @@ public class BoardController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BoardDto>> getBoards() {
+    public ResponseEntity<List<BoardDto>> getBoards() {//delete or admin role
         List<BoardDto> boards = boardService.getBoards();
         return ResponseEntity.ok(boards);
     }

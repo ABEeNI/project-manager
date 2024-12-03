@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "JOIN t.projects p " +
             "WHERE p.id = :projectId")
     List<User> findAllByProjectId(@Param("projectId") Long projectId);
+
+    boolean existsByEmail(String email);
 }

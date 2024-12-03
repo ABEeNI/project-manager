@@ -1,9 +1,10 @@
 package home.projectmanager.service;
 
-import home.projectmanager.controller.AuthenticationRequest;
-import home.projectmanager.controller.AuthenticationResponse;
-import home.projectmanager.controller.RegistrationRequest;
+import home.projectmanager.controller.auth.AuthenticationRequest;
+import home.projectmanager.controller.auth.AuthenticationResponse;
+import home.projectmanager.controller.auth.RegistrationRequest;
 import home.projectmanager.entity.User;
+import home.projectmanager.exception.user.UserAlreadyExistsException;
 import home.projectmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +28,9 @@ public class AuthService {
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .role(registrationRequest.getRole())
                 .build();
-
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException("User by this Email already exists");
+        }
         User savedUser = userRepository.save(user);
         var token = jwtService.generateToken(user);
         return AuthenticationResponse.builder()

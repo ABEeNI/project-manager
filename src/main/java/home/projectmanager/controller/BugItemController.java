@@ -29,7 +29,7 @@ public class BugItemController {
         return ResponseEntity.ok(bugItem);
     }
 
-    @GetMapping("/projects/{projectId}")//should be in ProjectController?
+    @GetMapping("/projects/{projectId}")
     public ResponseEntity<List<BugItemDto>> getBugItemsByProject(@PathVariable Long projectId) {
         List<BugItemDto> bugItems = bugItemService.getBugItemsByProject(projectId);
         return ResponseEntity.ok(bugItems);

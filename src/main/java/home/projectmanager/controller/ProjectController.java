@@ -5,6 +5,7 @@ import home.projectmanager.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,7 +51,8 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
-    //TODO Just ADMIN Role should be able to delete a project
+    //Just ADMIN Role should be able to delete a project
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
         projectService.deleteProject(id);

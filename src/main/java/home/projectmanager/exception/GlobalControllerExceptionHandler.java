@@ -12,6 +12,7 @@ import home.projectmanager.exception.project.ProjectNotFoundException;
 import home.projectmanager.exception.team.TeamAlreadyExistsException;
 import home.projectmanager.exception.team.TeamNameNotProvidedException;
 import home.projectmanager.exception.team.TeamNotFoundException;
+import home.projectmanager.exception.user.UserAlreadyExistsException;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.exception.workitem.WorkItemNotFoundException;
 import home.projectmanager.exception.workitem.WorkItemTitleNotProvidedException;
@@ -58,6 +59,11 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFound(UserNotFoundException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<String> handleUserAlreadyExists(UserAlreadyExistsException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BoardNotFoundException.class)

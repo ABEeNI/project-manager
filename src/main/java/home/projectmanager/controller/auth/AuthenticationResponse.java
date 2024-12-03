@@ -1,4 +1,4 @@
-package home.projectmanager.controller;
+package home.projectmanager.controller.auth;
 
 import lombok.*;
 
