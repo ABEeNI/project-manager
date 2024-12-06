@@ -99,7 +99,7 @@ public class WorkItemServiceImpl implements WorkItemService {
     @Override
     public WorkItemDto getWorkItem(Long id) {
         WorkItem workItem = workItemRepository.findById(id)
-                .orElseThrow(() -> new WorkItemNotFoundException("Work item not found"));
+                .orElseThrow(() -> new WorkItemNotFoundException("Work item with id " + id + " not found"));
         if(!accessDecisionVoter.hasPermission(workItem)) {
             throw new AccessDeniedException("User does not have permission to work item with id " + id);
         }
@@ -147,7 +147,7 @@ public class WorkItemServiceImpl implements WorkItemService {
     @Transactional
     public void deleteWorkItem(Long id) {
         WorkItem workItem = workItemRepository.findById(id)
-                .orElseThrow(() -> new WorkItemNotFoundException("Work item not found"));
+                .orElseThrow(() -> new WorkItemNotFoundException("Work item with id " + id + " not found"));
         if(!accessDecisionVoter.hasPermission(workItem)) {
             throw new AccessDeniedException("User does not have permission to work item with id " + id);
         }
@@ -164,7 +164,7 @@ public class WorkItemServiceImpl implements WorkItemService {
     @Transactional
     public WorkItemDto updateWorkItem(Long id, WorkItemDto workItemDto) {
         WorkItem workItem = workItemRepository.findById(id)
-                .orElseThrow(() -> new WorkItemNotFoundException("Work item not found"));
+                .orElseThrow(() -> new WorkItemNotFoundException("Work item with id " + id + " not found"));
         if(!accessDecisionVoter.hasPermission(workItem)) {
             throw new AccessDeniedException("User does not have permission to work item with id " + id);
         }
