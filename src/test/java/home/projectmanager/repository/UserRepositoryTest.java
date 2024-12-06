@@ -19,7 +19,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void testFindByEmail() {
+    void findAllByUsersId_ShouldReturnTeams_WhenUserIdExists() {
         User user = User.builder()
                 .firstName("Carol")
                 .lastName("Williams")

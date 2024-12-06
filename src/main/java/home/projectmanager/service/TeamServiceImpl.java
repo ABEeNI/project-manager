@@ -12,10 +12,12 @@ import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.TeamRepository;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
 import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +31,7 @@ public class TeamServiceImpl implements TeamService {
     public final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final AuthenticationFacade authenticationFacade;
-
+    private final AccessDecisionVoter accessDecisionVoter;
 
     @Override
     public TeamDto createTeam(TeamDto teamDto) {
@@ -55,13 +57,16 @@ public class TeamServiceImpl implements TeamService {
     public TeamDto getTeam(Long id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + id + " not found"));
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to access team with id " + id);
+        }
         List<User> users = team.getUsers();
         List<UserDto> userDtos = users.stream()
                 .map(user -> UserDto.builder()
                         .id(user.getId())
                         .firstName(user.getFirstName())
                         .lastName(user.getLastName())
-                        .email("")//email is not included, so email addresses are not exposed, but "" for frontend consistency
+                        .email("")//email is not included, so email addresses are not exposed, but ""
                         .build())
                 .collect(Collectors.toList());
 
@@ -93,10 +98,12 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void deleteTeam(Long id) {
-        if(!teamRepository.existsById(id)) {
-            throw new TeamNotFoundException("Team with id " + id + " not found");
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new TeamNotFoundException("Team with id " + id + " not found"));
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to delete team with id " + id);
         }
-        teamRepository.deleteById(id);
+        teamRepository.deleteById(id); //Could change to teamRepository.delete(team) to avoid the deleteById call, however works the same
         log.info("Team with id {} deleted", id);
     }
 
@@ -105,6 +112,9 @@ public class TeamServiceImpl implements TeamService {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new TeamNotFoundException("Team with id " + id + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to update team with id " + id);
+        }
         team.setTeamName(teamDto.teamName());
         Team updatedTeam = teamRepository.save(team);
         log.info("Team with id {} updated", id);
@@ -119,6 +129,10 @@ public class TeamServiceImpl implements TeamService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userEmail + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to add user with useremail " + userEmail + " to team with id " + teamId);
+        }
+
         if(team.getUsers().contains(user)) {
             throw new TeamAlreadyExistsException("User with useremail " + userEmail + " already exists in team with id " + teamId);
         }
@@ -126,7 +140,6 @@ public class TeamServiceImpl implements TeamService {
         team.addUser(user);
 
         teamRepository.save(team);
-        userRepository.save(user);//Cascade??
         log.info("User with useremail {} added to team with id {}", userEmail, teamId);
     }
 
@@ -137,6 +150,9 @@ public class TeamServiceImpl implements TeamService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userEmail + " not found"));
 
+        if(!accessDecisionVoter.hasPermission(team)) {
+            throw new AccessDeniedException("User does not have permission to remove user with useremail " + userEmail + " from team with id " + teamId);
+        }
         if(!team.getUsers().contains(user)) {
             throw new TeamNotFoundException("User with useremail " + userEmail + " not found in team with id " + teamId);
         }
@@ -148,7 +164,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamDto> getTeamsByUserId(Long userId) {
+    public List<TeamDto> getTeamsByUserId(Long userId) {//could be adjusted, would not need the id, just for the currentUser from AuthenticationFacade
         List<Team> teams = teamRepository.findAllByUsersId(userId);
         return teams.stream().map(this::convertToDto).toList();
     }

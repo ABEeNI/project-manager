@@ -3,7 +3,6 @@ package home.projectmanager.repository;
 import home.projectmanager.entity.Team;
 import home.projectmanager.entity.User;
 import home.projectmanager.entity.Role;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,7 @@ class TeamRepositoryTest {
     }
 
     @Test
-    void testFindByTeamName() {
+    void findByTeamName_ShouldReturnTeam_WhenTeamNameExists() {
         Optional<Team> found = teamRepository.findByTeamName("Gamma Team");
 
         assertTrue(found.isPresent());
@@ -67,7 +66,7 @@ class TeamRepositoryTest {
     }
 
     @Test
-    void testFindAllByUsersId() {
+    void findAllByUsersId_ShouldReturnTeams_WhenUserIdExists() {
         List<Team> teams = teamRepository.findAllByUsersId(user.getId());
 
         assertEquals(2, teams.size());

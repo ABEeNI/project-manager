@@ -12,6 +12,7 @@ import home.projectmanager.exception.team.TeamNotFoundException;
 import home.projectmanager.exception.user.UserNotFoundException;
 import home.projectmanager.repository.TeamRepository;
 import home.projectmanager.repository.UserRepository;
+import home.projectmanager.service.accesscontrol.AccessDecisionVoter;
 import home.projectmanager.service.accesscontrol.AuthenticationFacade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +43,11 @@ class TeamServiceTest {
     @Mock
     private AuthenticationFacade authenticationFacade;
 
+    @Mock
+    private AccessDecisionVoter accessDecisionVoter;
+
     @Test
-    void testCreateTeam() { //needs refactoring after changes, but with integration test it currently works
+    void createTeam_ShouldCreateTeam_WhenValidRequestIsProvided() {
         TeamDto teamDto = TeamDto.builder()
                 .teamName("Backend")
                 .build();
@@ -54,7 +58,7 @@ class TeamServiceTest {
 
         when(teamRepository.save(any(Team.class))).thenReturn(team);
         when(teamRepository.findByTeamName("Backend")).thenReturn(Optional.empty());
-        when(authenticationFacade.getCurrentUser()).thenReturn(User.builder().teams(new ArrayList<>()).build());//probably will need to change this
+        when(authenticationFacade.getCurrentUser()).thenReturn(User.builder().teams(new ArrayList<>()).build());
 
         TeamDto createdTeamDto = teamService.createTeam(teamDto);
 
@@ -62,7 +66,7 @@ class TeamServiceTest {
     }
 
     @Test
-    void testCreateTeamWithEmptyName() {
+    void createTeam_ShouldThrowException_WhenTeamNameIsEmpty() {
         TeamDto teamDto = TeamDto.builder()
                 .teamName("")
                 .build();
@@ -71,7 +75,7 @@ class TeamServiceTest {
     }
 
     @Test
-    void testCreateTeamWhenTeamAlreadyExists() {
+    void createTeam_ShouldThrowException_WhenTeamAlreadyExists() {
         TeamDto teamDto = TeamDto.builder()
                 .teamName("Backend")
                 .build();
@@ -86,7 +90,7 @@ class TeamServiceTest {
     }
 
     @Test
-    void testGetTeamWhenIdGiven() {
+    void getTeam_ShouldReturnTeamDto_WhenTeamExists() {
         Long id = 1L;
         String teamName = "Backend";
         Team team = Team.builder()
@@ -109,7 +113,6 @@ class TeamServiceTest {
                 .projectDescription("Description")
                 .teams(new ArrayList<>())
                 .boards(new ArrayList<>())
-                //.bugItems(new ArrayList<>())
                 .build();
         team.addProject(project);
         TeamDto expectedTeamDto = TeamDto.builder()
@@ -128,6 +131,7 @@ class TeamServiceTest {
                         .build()))
                 .build();
         when(teamRepository.findById(id)).thenReturn(Optional.of(team));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
 
         TeamDto result = teamService.getTeam(id);
 
@@ -135,7 +139,7 @@ class TeamServiceTest {
     }
 
     @Test
-    void testGetTeamWhenIdIsNotFound() {
+    void getTeam_ShouldThrowException_WhenTeamDoesNotExist() {
         long id = 1L;
         when(teamRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -143,7 +147,7 @@ class TeamServiceTest {
     }
 
     @Test
-    void testGetTeams() {
+    void getTeams_ShouldReturnAllTeams() {
         Team team1 = Team.builder()
                 .id(1L)
                 .teamName("Backend")
@@ -170,10 +174,16 @@ class TeamServiceTest {
     }
 
     @Test
-    void testDeleteTeamWhenIdIsValid() {
+    void deleteTeam_ShouldDeleteTeam_WhenTeamExists() {
         long id = 1L;
 
-        when(teamRepository.existsById(id)).thenReturn(true);
+        Team team = Team.builder()
+                .id(id)
+                .teamName("Backend")
+                .build();
+
+        when(teamRepository.findById(id)).thenReturn(Optional.of(team));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
 
         teamService.deleteTeam(id);
 
@@ -181,16 +191,16 @@ class TeamServiceTest {
     }
 
     @Test
-    void testDeleteTeamWhenIdIsNotFound() {
+    void deleteTeam_ShouldThrowException_WhenTeamDoesNotExist() {
         long id = 1L;
 
-        when(teamRepository.existsById(id)).thenReturn(false);
+        when(teamRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(TeamNotFoundException.class, () -> teamService.deleteTeam(id));
     }
 
     @Test
-    void testUpdateTeamWhenIdIsValid() {
+    void updateTeam_ShouldUpdateTeam_WhenValidRequestIsProvided() {
         long id = 1L;
         String teamName = "Backend";
         TeamDto teamDto = TeamDto.builder()
@@ -203,6 +213,7 @@ class TeamServiceTest {
                 .build();
 
         when(teamRepository.findById(id)).thenReturn(Optional.of(team));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
         when(teamRepository.save(any(Team.class))).thenReturn(team);
 
         TeamDto updatedTeamDto = teamService.updateTeam(id, teamDto);
@@ -211,7 +222,7 @@ class TeamServiceTest {
     }
 
     @Test
-    void testUpdateTeamWhenIdIsNotFound() {
+    void updateTeam_ShouldThrowException_WhenTeamDoesNotExist() {
         long id = 1L;
         String teamName = "Backend";
         TeamDto teamDto = TeamDto.builder()
@@ -253,6 +264,7 @@ class TeamServiceTest {
 
 
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(userToBeAdded));
 
         teamService.addUserToTeam(teamId, userEmail);
@@ -260,7 +272,6 @@ class TeamServiceTest {
         assertTrue(team.getUsers().contains(userToBeAdded));
         assertTrue(userToBeAdded.getTeams().contains(team));
         verify(teamRepository, times(1)).save(any(Team.class));
-        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
@@ -315,11 +326,80 @@ class TeamServiceTest {
 
 
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(userToBeAdded));
 
         assertThrows(TeamAlreadyExistsException.class, () -> teamService.addUserToTeam(teamId, userEmail));
     }
-    //TODO Test for removeUserFromTeam no user with email, no team with id, user not in team
+
+    @Test
+    void removeUserFromTeam_ShouldRemoveUser_WhenValidRequestIsProvided() {
+        Long teamId = 1L;
+        String userEmail = "john.doe@example.com";
+
+        User user = User.builder()
+                .id(2L)
+                .email(userEmail)
+                .teams(new ArrayList<>())
+                .build();
+        Team team = Team.builder()
+                .id(teamId)
+                .users(new ArrayList<>(List.of(user)))
+                .build();
+        user.getTeams().add(team);
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
+
+        teamService.removeUserFromTeam(teamId, userEmail);
+
+        assertFalse(team.getUsers().contains(user));
+        verify(teamRepository, times(1)).save(team);
+    }
+
+    @Test
+    void removeUserFromTeam_ShouldThrowException_WhenTeamDoesNotExist() {
+        Long teamId = 1L;
+        String userEmail = "john.doe@example.com";
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+
+        assertThrows(TeamNotFoundException.class, () -> teamService.removeUserFromTeam(teamId, userEmail));
+    }
+
+    @Test
+    void removeUserFromTeam_ShouldThrowException_WhenUserDoesNotExist() {
+        Long teamId = 1L;
+        String userEmail = "john.doe@example.com";
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(Team.builder().build()));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> teamService.removeUserFromTeam(teamId, userEmail));
+    }
+
+    @Test
+    void removeUserFromTeam_ShouldThrowException_WhenUserNotInTeam() {
+        Long teamId = 1L;
+        String userEmail = "john.doe@example.com";
+
+        User user = User.builder()
+                .id(2L)
+                .email(userEmail)
+                .build();
+        Team team = Team.builder()
+                .id(teamId)
+                .users(new ArrayList<>())
+                .build();
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
+        when(accessDecisionVoter.hasPermission(team)).thenReturn(true);
+
+        assertThrows(TeamNotFoundException.class, () -> teamService.removeUserFromTeam(teamId, userEmail));
+    }
+
 
     @Test
     void getTeamsByUserId_ShouldReturnTeams_WhenUserExists() {

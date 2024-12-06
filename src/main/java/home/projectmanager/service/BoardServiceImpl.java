@@ -38,7 +38,7 @@ public class BoardServiceImpl implements BoardService {
         if(boardDto.projectId() == null) {
             throw new ProjectNotFoundException("Project id is not provided");
         }
-        Project project = projectRepository.findById(boardDto.projectId()) //?? Should it be from pathvariable and in the ProjectService?
+        Project project = projectRepository.findById(boardDto.projectId())
                 .orElseThrow(() -> new ProjectNotFoundException("Project with id: " + boardDto.projectId() + " not found"));
         if(!accessDecisionVoter.hasPermission(project)) {
             throw new AccessDeniedException("User does not have permission to project with id " + boardDto.projectId());
@@ -49,10 +49,8 @@ public class BoardServiceImpl implements BoardService {
                 .projectId(boardDto.projectId())
                 .build();
 
-        project.addBoard(newBoard);//needed? Not even saved later. Only the value of the foreign key is relevant
-
         Board savedBoard = boardRepository.save(newBoard);
-        //projectRepository.save(project);//cascade? Do I need to save project? Probably not
+
         log.info("Board created: {}", savedBoard);
         return convertToDto(savedBoard);
     }
@@ -74,7 +72,7 @@ public class BoardServiceImpl implements BoardService {
                         .points(workItem.getPoints())
                         .status(workItem.getStatus())
                         .build())
-                .collect(Collectors.toList());//TODO .toList() everywhere
+                .collect(Collectors.toList());
 
         return BoardDto.builder()
                 .id(board.getId())
@@ -85,7 +83,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public List<BoardDto> getBoards() {//extra/ maybe leave for ADMIN, getBoardByProjectId could be enough
+    public List<BoardDto> getBoards() {
         List<Board> boards = boardRepository.findAll();
         return boards.stream()
                 .map(this::convertToDto)
@@ -94,7 +92,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
-    public void deleteBoard(Long id) {//ADMIN or USER? if User then AccessDecisionVoter needed to be added
+    public void deleteBoard(Long id) {
         if (!boardRepository.existsById(id)) {
             throw new BoardNotFoundException("Board not found");
         }

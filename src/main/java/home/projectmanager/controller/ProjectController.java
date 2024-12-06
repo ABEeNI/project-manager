@@ -22,11 +22,13 @@ public class ProjectController {
         ProjectDto createdProjectDto = projectService.createProject(projectDto, teamId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProjectDto);
     }
+
     @PutMapping("/{projectId}/teams/{teamId}")
     public ResponseEntity<Void> addTeamToProject(@PathVariable Long projectId, @PathVariable Long teamId) {
         projectService.addTeamToProject(projectId, teamId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     @DeleteMapping("/{projectId}/teams/{teamId}")
     public ResponseEntity<Void> removeTeamFromProject(@PathVariable Long projectId, @PathVariable Long teamId) {
         projectService.removeTeamFromProject(projectId, teamId);
@@ -45,6 +47,7 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ProjectDto>> getProjects() {
         List<ProjectDto> projects = projectService.getProjects();

@@ -41,7 +41,7 @@ class TeamControllerTest {
     private TeamService teamService;
 
     @Test
-    void testCreateTeam() throws Exception {
+    void createTeam_ShouldReturnCreatedTeam_WhenTeamIsValid() throws Exception {
 
         String teamName = "Backend";
         TeamDto expectedTeam = TeamDto.builder()
@@ -58,7 +58,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testCreateTeamWithEmptyName() throws Exception {
+    void createTeam_ShouldReturnBadRequest_WhenTeamNameIsEmpty() throws Exception {
 
         String teamName = "";
         TeamDto teamDto = TeamDto.builder()
@@ -75,7 +75,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testCreateTeamWhenTeamAlreadyExists() throws Exception {
+    void createTeam_ShouldReturnBadRequest_WhenTeamAlreadyExists() throws Exception {
 
         String teamName = "Backend";
         TeamDto teamDto = TeamDto.builder()
@@ -92,7 +92,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testGetTeamWhenIdIsProvided() throws Exception {
+    void getTeam_ShouldReturnTeam_WhenTeamExists() throws Exception {
 
         Long teamId = 1L;
         String teamName = "Backend";
@@ -122,7 +122,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testGetTeamWhenIdIsNotFound() throws Exception {
+    void getTeam_ShouldReturnNotFound_WhenTeamDoesNotExist() throws Exception {
 
         Long teamId = 1L;
 
@@ -134,7 +134,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testGetTeams() throws Exception {
+    void getTeams_ShouldReturnListOfTeams_WhenTeamsExist() throws Exception {
 
         when(teamService.getTeams()).thenReturn(List.of(
                 TeamDto.builder()
@@ -153,7 +153,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testGetTeamsWhenNoTeams() throws Exception {
+    void getTeams_ShouldReturnEmptyList_WhenNoTeamsExist() throws Exception {
 
         when(teamService.getTeams()).thenReturn(List.of());
 
@@ -163,7 +163,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testDeleteTeam() throws Exception {
+    void deleteTeam_ShouldReturnNoContent_WhenTeamIsDeleted() throws Exception {
 
         Long teamId = 1L;
 
@@ -172,7 +172,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testDeleteTeamWhenIdIsNotFound() throws Exception {
+    void deleteTeam_ShouldReturnNotFound_WhenTeamDoesNotExist() throws Exception {
 
         Long teamId = 1L;
 
@@ -184,7 +184,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testUpdateTeam () throws Exception {
+    void updateTeam_ShouldReturnUpdatedTeam_WhenTeamIsValid() throws Exception {
 
         Long teamId = 1L;
         String teamName = "Backend";
@@ -202,7 +202,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testUpdateTeamWhenIdIsNotFound() throws Exception {
+    void updateTeam_ShouldReturnNotFound_WhenTeamDoesNotExist() throws Exception {
 
         Long teamId = 1L;
         String teamName = "Backend";
@@ -220,7 +220,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testAddUserToTeam() throws Exception {
+    void addUserToTeam_ShouldReturnOk_WhenUserIsAdded() throws Exception {
         String userEmail = "john.doe@eamil.com";
         Long teamId = 1L;
 
@@ -229,7 +229,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testAddUserToTeamWhenTeamIdIsNotFound() throws Exception {
+    void addUserToTeam_ShouldReturnNotFound_WhenTeamDoesNotExist() throws Exception {
         String userEmail = "john.doe@eamil.com";
         Long teamId = 1L;
 
@@ -241,7 +241,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void testAddUserToTeamWhenUserEmailIsNotFound() throws Exception {
+    void addUserToTeam_ShouldReturnNotFound_WhenUserDoesNotExist() throws Exception {
         String userEmail = "john.doe@eamil.com";
         Long teamId = 1L;
 
@@ -250,6 +250,30 @@ class TeamControllerTest {
         mockMvc.perform(put("/api/teams/" + teamId + "/users/" + userEmail))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("User with id " + userEmail + " not found"));
+    }
+
+    @Test
+    void getTeamsByUserId_ShouldReturnListOfTeams_WhenUserExists() throws Exception {
+        Long userId = 1L;
+
+        TeamDto team1 = TeamDto.builder().id(1L).teamName("Backend").build();
+        TeamDto team2 = TeamDto.builder().id(2L).teamName("Frontend").build();
+
+        when(teamService.getTeamsByUserId(userId)).thenReturn(List.of(team1, team2));
+
+        mockMvc.perform(get("/api/teams/users/{userId}", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].teamName").value("Backend"))
+                .andExpect(jsonPath("$[1].teamName").value("Frontend"));
+    }
+
+    @Test
+    void removeUserFromTeam_ShouldReturnOk_WhenUserIsRemoved() throws Exception {
+        Long teamId = 1L;
+        String userEmail = "john.doe@email.com";
+
+        mockMvc.perform(delete("/api/teams/{teamId}/users/{userEmail}", teamId, userEmail))
+                .andExpect(status().isOk());
     }
 
 

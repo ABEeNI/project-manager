@@ -1,6 +1,6 @@
 package home.projectmanager.security;
 
-import home.projectmanager.service.JwtService;
+import home.projectmanager.service.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

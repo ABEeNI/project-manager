@@ -3,7 +3,6 @@ package home.projectmanager.controller;
 import home.projectmanager.dto.TeamDto;
 import home.projectmanager.service.TeamService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,12 +28,14 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(teamDto);
     }
 
+    //do we need this method?
     @GetMapping
     public ResponseEntity<List<TeamDto>> getTeams() {
         List<TeamDto> teamDtos = teamService.getTeams();
         return ResponseEntity.status(HttpStatus.OK).body(teamDtos);
     }
 
+    //maybe just ADMIN, or check for domain
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTeam(@PathVariable Long id) {
         teamService.deleteTeam(id);
@@ -63,7 +64,4 @@ public class TeamController {
         teamService.removeUserFromTeam(teamId, userEmail);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-
-
 }

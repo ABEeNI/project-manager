@@ -5,6 +5,7 @@ import home.projectmanager.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,13 +29,14 @@ public class BoardController {
         return ResponseEntity.ok(board);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<BoardDto>> getBoards() {//delete or admin role
+    public ResponseEntity<List<BoardDto>> getBoards() {
         List<BoardDto> boards = boardService.getBoards();
         return ResponseEntity.ok(boards);
     }
 
-    @GetMapping("/projects/{projectId}")//should be in ProjectController?
+    @GetMapping("/projects/{projectId}")
     public ResponseEntity<List<BoardDto>> getBoardsByProject(@PathVariable Long projectId) {
         List<BoardDto> boards = boardService.getBoardsByProject(projectId);
         return ResponseEntity.ok(boards);
@@ -46,6 +48,7 @@ public class BoardController {
         return ResponseEntity.ok(updatedBoard);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
         boardService.deleteBoard(id);

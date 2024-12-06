@@ -51,14 +51,4 @@ public class Project {
         teams.remove(team);
         team.getProjects().remove(this);
     }
-
-    public void addBoard(Board board) {
-        boards.add(board);
-        //board.setProject(this);
-    }
-
-//    public void removeBoard(Board board) {
-//        boards.remove(board);
-//        board.setProject(null);
-//    }
 }

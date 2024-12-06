@@ -202,7 +202,7 @@ class BoardServiceTest {
 
     @Test
     void getBoardsByProject_ShouldReturnBoardDtos_WhenProjectExistsAndUserHasPermission() {
-        project.addBoard(board);
+        project.getBoards().add(board);
 
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
         when(accessDecisionVoter.hasPermission(project)).thenReturn(true);

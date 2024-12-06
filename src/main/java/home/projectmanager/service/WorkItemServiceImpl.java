@@ -133,7 +133,7 @@ public class WorkItemServiceImpl implements WorkItemService {
                 .boardId(workItem.getBoardId())
                 .subWorkItems(workItem.getSubWorkItems().stream()
                         .map(this::convertToDto)
-                        .collect(Collectors.toList()))//what if null?
+                        .collect(Collectors.toList()))
                 .comments(commentDtos)
                 .assignedUser(workItem.getAssignedUser() != null ? UserDto.builder()
                         .id(workItem.getAssignedUser().getId())
@@ -230,5 +230,5 @@ private WorkItemDto convertToDto(WorkItem workItem) {
                     .description(workItem.getBugItem().getDescription())
                     .build() : null)
             .build();
-}
+    }
 }

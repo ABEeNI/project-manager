@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
-        user.setFirstName(userDto.firstName());
+        user.setFirstName(userDto.firstName());//?? Should we check if the fields are null or empty? wont crash, but next feature
         user.setLastName(userDto.lastName());
         User updatedUser = userRepository.save(user);
         log.info("User with id {} updated", userId);

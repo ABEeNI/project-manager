@@ -1,6 +1,6 @@
 package home.projectmanager.controller.auth;
 
-import home.projectmanager.service.AuthService;
+import home.projectmanager.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

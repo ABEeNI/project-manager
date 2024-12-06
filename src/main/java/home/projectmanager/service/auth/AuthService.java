@@ -1,4 +1,4 @@
-package home.projectmanager.service;
+package home.projectmanager.service.auth;
 
 import home.projectmanager.controller.auth.AuthenticationRequest;
 import home.projectmanager.controller.auth.AuthenticationResponse;

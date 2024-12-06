@@ -44,6 +44,7 @@ class AccessDecisionVoterTest {
         currentUser.setLastName(lastName);
 
     }
+
     @Test
     void hasPermission_ShouldReturnTrue_WhenUserHasPermissionToProject() {
         Project project = new Project();

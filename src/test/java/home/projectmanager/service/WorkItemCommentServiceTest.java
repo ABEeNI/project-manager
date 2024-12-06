@@ -201,6 +201,19 @@ class WorkItemCommentServiceTest {
         assertThrows(WorkItemCommentNotFoundException.class,
                 () -> workItemCommentService.updateComment(commentId, updatedCommentDto));
     }
+    @Test
+    void updateComment_ShouldThrowException_WhenAccessDenied() {
+        Long commentId = 1L;
+        WorkItemCommentDto updatedCommentDto = WorkItemCommentDto.builder()
+                .comment("Updated Comment")
+                .build();
+
+        when(workItemCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(accessDecisionVoter.hasPermission(comment)).thenReturn(false);
+
+        assertThrows(AccessDeniedException.class,
+                () -> workItemCommentService.updateComment(commentId, updatedCommentDto));
+    }
 
     @Test
     void deleteComment_ShouldDeleteComment_WhenValidData() {

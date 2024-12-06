@@ -72,7 +72,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void testFindByProjectName() {
+    void createBoard_ShouldReturnCreatedBoard_WhenValidBoardDtoIsProvided() {
         Optional<Project> found = projectRepository.findByProjectName("Alpha Project");
 
         assertTrue(found.isPresent());
@@ -80,7 +80,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void testFindAllByUserId() {
+    void findAllByUserId_ShouldReturnProjects_WhenUserIdExists() {
         List<Project> projects = projectRepository.findAllByUserId(user.getId());
 
         assertEquals(2, projects.size());
